@@ -374,10 +374,176 @@ namespace CxRouRou.Collections
         {
             return Push(StringEncoding.GetBytes(value));
         }
+        /// <summary>
+        /// 压入字面常量byte
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public virtual CxByteBuffer Push_byte(int value)
+        {
+            return Push((byte)value);
+        }
+        /// <summary>
+        /// 压入字面常量sbyte
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public virtual CxByteBuffer Push_sbyte(int value)
+        {
+            return Push((sbyte)value);
+        }
+        /// <summary>
+        /// 压入字面常量short
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public virtual CxByteBuffer Push_short(int value)
+        {
+            return Push((short)value);
+        }
+        /// <summary>
+        /// 压入字面常量ushort
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public virtual CxByteBuffer Push_ushort(int value)
+        {
+            return Push((ushort)value);
+        }
+        /// <summary>
+        /// 压入字面常量char
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public virtual CxByteBuffer Push_char(int value)
+        {
+            return Push((char)value);
+        }
+        /// <summary>
+        /// 压入字面常量float
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public virtual CxByteBuffer Push_float(int value)
+        {
+            return Push((float)value);
+        }
+        /// <summary>
+        /// 压入字面常量float
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public virtual CxByteBuffer Push_float(double value)
+        {
+            return Push((float)value);
+        }
+        /// <summary>
+        /// 压入字面常量long
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public virtual CxByteBuffer Push_long(int value)
+        {
+            return Push((long)value);
+        }
+        /// <summary>
+        /// 压入字面常量ulong
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public virtual CxByteBuffer Push_ulong(int value)
+        {
+            return Push((ulong)value);
+        }
+        /// <summary>
+        /// 压入字面常量double
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public virtual CxByteBuffer Push_double(int value)
+        {
+            return Push((double)value);
+        }
+        /// <summary>
+        /// 压入字面常量double
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public virtual CxByteBuffer Push_double(double value)
+        {
+            return Push((double)value);
+        }
         #endregion
 
         #region 弹出数据
+        public virtual byte Pop_byte()
+        {
+            if (Eof || ReadPos + 1 > Length)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+            return Data[ReadPos++];
+        }
+        public virtual sbyte Pop_sbyte()
+        {
+            return (sbyte)Pop_byte();
+        }
+        public virtual bool Pop_bool()
+        {
+            bool b = false;
+            if (Pop_byte() == 1)
+            {
+                b = true;
+            }
+            return b;
 
+        }
+        public virtual short Pop_short()
+        {
+            if (Eof || ReadPos + 2 > Length)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+            return (short)(Data[ReadPos++] << 8 | Data[ReadPos++]);
+        }
+        public virtual ushort Pop_ushort()
+        {
+            return (ushort)Pop_short();
+        }
+        public virtual char Pop_char()
+        {
+            return (char)Pop_short();
+        }
+        public virtual int Pop_int()
+        {
+            if (Eof || ReadPos + 4 > Length)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+            return (int)(Data[ReadPos++] << 24 | Data[ReadPos++] << 16 | Data[ReadPos++] << 8 | Data[ReadPos++]);
+        }
+        public virtual uint Pop_uint()
+        {
+            return (uint)Pop_int();
+        }
+        public virtual unsafe float Pop_float()
+        {
+            int value = Pop_int();
+            return *(float*)&value;
+        }
+        public virtual long Pop_long()
+        {
+            if (Eof || ReadPos + 8 > Length)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+            //return (long)Pop_int() << 32 | Pop_uint();
+            return ((long)Data[ReadPos++]) << 56 | ((long)Data[ReadPos++]) << 48 | ((long)Data[ReadPos++]) << 40 | ((long)Data[ReadPos++]) << 32 | ((long)Data[ReadPos++]) << 24 | ((long)Data[ReadPos++]) << 16 | ((long)Data[ReadPos++]) << 8 | Data[ReadPos++];
+        }
+        public virtual ulong Pop_ulong()
+        {
+            return (ulong)Pop_long();
+        }
         #endregion
     }
 }
