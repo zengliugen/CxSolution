@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace CxRouRou.Collections
@@ -260,8 +259,11 @@ namespace CxRouRou.Collections
         public virtual CxByteBuffer Push(short value)
         {
             EnsureCapacity(2);
+            //Data[WritePos++] = (byte)(value >> 8);
+            //Data[WritePos++] = (byte)(value << 8 >> 8);
+
             Data[WritePos++] = (byte)(value >> 8);
-            Data[WritePos++] = (byte)(value << 8 >> 8);
+            Data[WritePos++] = (byte)value;
             return this;
         }
         /// <summary>
@@ -290,10 +292,15 @@ namespace CxRouRou.Collections
         public virtual CxByteBuffer Push(int value)
         {
             EnsureCapacity(4);
+            //Data[WritePos++] = (byte)(value >> 24);
+            //Data[WritePos++] = (byte)(value << 8 >> 24);
+            //Data[WritePos++] = (byte)(value << 16 >> 24);
+            //Data[WritePos++] = (byte)(value << 24 >> 24);
+
             Data[WritePos++] = (byte)(value >> 24);
-            Data[WritePos++] = (byte)(value << 8 >> 24);
-            Data[WritePos++] = (byte)(value << 16 >> 24);
-            Data[WritePos++] = (byte)(value << 24 >> 24);
+            Data[WritePos++] = (byte)(value >> 16);
+            Data[WritePos++] = (byte)(value >> 8);
+            Data[WritePos++] = (byte)value;
             return this;
         }
         /// <summary>
@@ -322,14 +329,23 @@ namespace CxRouRou.Collections
         public virtual CxByteBuffer Push(long value)
         {
             EnsureCapacity(8);
+            //Data[WritePos++] = (byte)(value >> 56);
+            //Data[WritePos++] = (byte)(value << 8 >> 56);
+            //Data[WritePos++] = (byte)(value << 16 >> 56);
+            //Data[WritePos++] = (byte)(value << 24 >> 56);
+            //Data[WritePos++] = (byte)(value << 32 >> 56);
+            //Data[WritePos++] = (byte)(value << 40 >> 56);
+            //Data[WritePos++] = (byte)(value << 48 >> 56);
+            //Data[WritePos++] = (byte)(value << 56 >> 56);
+
             Data[WritePos++] = (byte)(value >> 56);
-            Data[WritePos++] = (byte)(value << 8 >> 56);
-            Data[WritePos++] = (byte)(value << 16 >> 56);
-            Data[WritePos++] = (byte)(value << 24 >> 56);
-            Data[WritePos++] = (byte)(value << 32 >> 56);
-            Data[WritePos++] = (byte)(value << 40 >> 56);
-            Data[WritePos++] = (byte)(value << 48 >> 56);
-            Data[WritePos++] = (byte)(value << 56 >> 56);
+            Data[WritePos++] = (byte)(value >> 48);
+            Data[WritePos++] = (byte)(value >> 40);
+            Data[WritePos++] = (byte)(value >> 32);
+            Data[WritePos++] = (byte)(value >> 24);
+            Data[WritePos++] = (byte)(value >> 16);
+            Data[WritePos++] = (byte)(value >> 8);
+            Data[WritePos++] = (byte)value;
             return this;
         }
         /// <summary>
@@ -476,6 +492,10 @@ namespace CxRouRou.Collections
         #endregion
 
         #region 弹出数据
+        /// <summary>
+        /// 弹出byte
+        /// </summary>
+        /// <returns></returns>
         public virtual byte Pop_byte()
         {
             if (Eof || ReadPos + 1 > Length)
@@ -484,10 +504,18 @@ namespace CxRouRou.Collections
             }
             return Data[ReadPos++];
         }
+        /// <summary>
+        /// 弹出sbyte
+        /// </summary>
+        /// <returns></returns>
         public virtual sbyte Pop_sbyte()
         {
             return (sbyte)Pop_byte();
         }
+        /// <summary>
+        /// 弹出bool
+        /// </summary>
+        /// <returns></returns>
         public virtual bool Pop_bool()
         {
             bool b = false;
@@ -498,6 +526,10 @@ namespace CxRouRou.Collections
             return b;
 
         }
+        /// <summary>
+        /// 弹出short
+        /// </summary>
+        /// <returns></returns>
         public virtual short Pop_short()
         {
             if (Eof || ReadPos + 2 > Length)
@@ -506,14 +538,26 @@ namespace CxRouRou.Collections
             }
             return (short)(Data[ReadPos++] << 8 | Data[ReadPos++]);
         }
+        /// <summary>
+        /// 弹出ushort
+        /// </summary>
+        /// <returns></returns>
         public virtual ushort Pop_ushort()
         {
             return (ushort)Pop_short();
         }
+        /// <summary>
+        /// 弹出char
+        /// </summary>
+        /// <returns></returns>
         public virtual char Pop_char()
         {
             return (char)Pop_short();
         }
+        /// <summary>
+        /// 弹出int
+        /// </summary>
+        /// <returns></returns>
         public virtual int Pop_int()
         {
             if (Eof || ReadPos + 4 > Length)
@@ -522,15 +566,27 @@ namespace CxRouRou.Collections
             }
             return (int)(Data[ReadPos++] << 24 | Data[ReadPos++] << 16 | Data[ReadPos++] << 8 | Data[ReadPos++]);
         }
+        /// <summary>
+        /// 弹出uint
+        /// </summary>
+        /// <returns></returns>
         public virtual uint Pop_uint()
         {
             return (uint)Pop_int();
         }
+        /// <summary>
+        /// 弹出float
+        /// </summary>
+        /// <returns></returns>
         public virtual unsafe float Pop_float()
         {
             int value = Pop_int();
             return *(float*)&value;
         }
+        /// <summary>
+        /// 弹出long
+        /// </summary>
+        /// <returns></returns>
         public virtual long Pop_long()
         {
             if (Eof || ReadPos + 8 > Length)
@@ -540,9 +596,39 @@ namespace CxRouRou.Collections
             //return (long)Pop_int() << 32 | Pop_uint();
             return ((long)Data[ReadPos++]) << 56 | ((long)Data[ReadPos++]) << 48 | ((long)Data[ReadPos++]) << 40 | ((long)Data[ReadPos++]) << 32 | ((long)Data[ReadPos++]) << 24 | ((long)Data[ReadPos++]) << 16 | ((long)Data[ReadPos++]) << 8 | Data[ReadPos++];
         }
+        /// <summary>
+        /// 弹出ulong
+        /// </summary>
+        /// <returns></returns>
         public virtual ulong Pop_ulong()
         {
             return (ulong)Pop_long();
+        }
+        /// <summary>
+        /// 弹出double
+        /// </summary>
+        /// <returns></returns>
+        public virtual unsafe double Pop_double()
+        {
+            long value = Pop_long();
+            return *(double*)&value;
+        }
+        /// <summary>
+        /// 弹出byte数组
+        /// </summary>
+        /// <returns></returns>
+        public virtual byte[] Pop_bytes()
+        {
+            var length = Pop_ushort();
+            return GetBytes(length);
+        }
+        /// <summary>
+        /// 弹出string
+        /// </summary>
+        /// <returns></returns>
+        public virtual string Pop_string()
+        {
+            return StringEncoding.GetString(Pop_bytes());
         }
         #endregion
     }
