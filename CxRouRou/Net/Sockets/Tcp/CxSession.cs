@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Net.Sockets;
+using System.Text;
 using CxRouRou.Collections;
 
 namespace CxRouRou.Net.Sockets.Tcp
@@ -70,8 +70,8 @@ namespace CxRouRou.Net.Sockets.Tcp
         {
             Socket = socket;
             Socket.SendBufferSize = sendBufferSize;
-            socket.SendTimeout = sendTimeout;
-            socket.ReceiveTimeout = receiveTimeout;
+            Socket.SendTimeout = sendTimeout;
+            Socket.ReceiveTimeout = receiveTimeout;
             Socket.NoDelay = !false;// 不使用nagle算法延迟(将收到发送请求就立即发送数据)  对udp无效
             Socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, true);
             Socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
@@ -111,6 +111,7 @@ namespace CxRouRou.Net.Sockets.Tcp
             {
                 if (Socket == null)
                 {
+                    //此处表示连接被关闭
                     return;
                 }
                 _sendList.Peek().Add(new ArraySegment<byte>(data, index, length));

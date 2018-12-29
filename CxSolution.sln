@@ -8,9 +8,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CxNetTestClient", "CxNetTes
 		{73685E29-C961-4D81-985E-66070FC03F1C} = {73685E29-C961-4D81-985E-66070FC03F1C}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CxRouRou", "CxRouRou\CxRouRou.csproj", "{73685E29-C961-4D81-985E-66070FC03F1C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CxRouRou", "CxRouRou\CxRouRou.csproj", "{73685E29-C961-4D81-985E-66070FC03F1C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CXRouRouTest", "CXRouRouTest\CXRouRouTest.csproj", "{2883345D-E692-43F7-B0F7-25F6DC0A7C78}"
+	ProjectSection(ProjectDependencies) = postProject
+		{73685E29-C961-4D81-985E-66070FC03F1C} = {73685E29-C961-4D81-985E-66070FC03F1C}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CxNetTestServer", "CxNetTestServer\CxNetTestServer.csproj", "{362AF890-1600-4AD7-8D81-313BEEBC5BB7}"
 	ProjectSection(ProjectDependencies) = postProject
 		{73685E29-C961-4D81-985E-66070FC03F1C} = {73685E29-C961-4D81-985E-66070FC03F1C}
 	EndProjectSection
@@ -33,6 +38,10 @@ Global
 		{2883345D-E692-43F7-B0F7-25F6DC0A7C78}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2883345D-E692-43F7-B0F7-25F6DC0A7C78}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2883345D-E692-43F7-B0F7-25F6DC0A7C78}.Release|Any CPU.Build.0 = Release|Any CPU
+		{362AF890-1600-4AD7-8D81-313BEEBC5BB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{362AF890-1600-4AD7-8D81-313BEEBC5BB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{362AF890-1600-4AD7-8D81-313BEEBC5BB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{362AF890-1600-4AD7-8D81-313BEEBC5BB7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

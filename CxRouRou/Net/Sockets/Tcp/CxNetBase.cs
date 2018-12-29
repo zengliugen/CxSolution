@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using CxRouRou.Collections;
+using CxRouRou.Util;
 
 namespace CxRouRou.Net.Sockets.Tcp
 {
@@ -14,7 +15,6 @@ namespace CxRouRou.Net.Sockets.Tcp
     {
         Close,//主动关闭
         BeClose,//被关闭
-        ExceptionClose,//异常关闭
     }
     /// <summary>
     /// 网络基类
@@ -123,8 +123,8 @@ namespace CxRouRou.Net.Sockets.Tcp
             catch (Exception e)
             {
                 PushAcceptSaea(socketAsyncEventArgs);
-                StopAcceptIPv4();
                 OnStartFail(port, e.Message);
+                StopAcceptIPv4();
             }
         }
         /// <summary>
@@ -138,7 +138,7 @@ namespace CxRouRou.Net.Sockets.Tcp
             {
                 CxSession session = _sessionManager.Pop();
                 session.SetSocket(socketAsyncEventArgs.AcceptSocket, _netConfig.SendBufferSize, _netConfig.SendTimeout, _netConfig.ReceiveTimeout);
-                OnGetConnection(session.ID, socketAsyncEventArgs.AcceptSocket.RemoteEndPoint.ToString());
+                OnAcceptSuccess(session.ID, socketAsyncEventArgs.AcceptSocket.RemoteEndPoint.ToString());
                 StartSession(session, null);
                 socketAsyncEventArgs.AcceptSocket = null;
                 try
@@ -161,19 +161,20 @@ namespace CxRouRou.Net.Sockets.Tcp
                 catch (Exception e)
                 {
                     PushAcceptSaea(socketAsyncEventArgs);
+                    OnAcceptFail(e.Message);
                     StopAcceptIPv4();
-                    OnClose(e.Message);
                 }
-                if (socketAsyncEventArgs.SocketError == SocketError.OperationAborted)
-                {
-                    //主动关闭的   
-                    PushAcceptSaea(socketAsyncEventArgs);
-                    return;
-                }
-                StopAcceptIPv4();
-                PushAcceptSaea(socketAsyncEventArgs);
-                OnClose(socketAsyncEventArgs.SocketError.ToString());
+                return;
             }
+            if (socketAsyncEventArgs.SocketError == SocketError.OperationAborted)
+            {
+                //主动关闭的   
+                PushAcceptSaea(socketAsyncEventArgs);
+                return;
+            }
+            PushAcceptSaea(socketAsyncEventArgs);
+            OnAcceptFail(socketAsyncEventArgs.SocketError.ToString());
+            StopAcceptIPv4();
         }
         /// <summary>
         /// 关闭接受连接
@@ -192,21 +193,22 @@ namespace CxRouRou.Net.Sockets.Tcp
             {
                 _socket.Close();
                 _socket = null;
-                OnClose("!SocketClose(IPv4)");
-            }
-            //关闭所有在线会话(IPv4)
-            ICollection<CxSession> onlines = _sessionManager.GetAllOnline();
-            List<CxSession> removes = new List<CxSession>(onlines.Count);
-            foreach (var session in onlines)
-            {
-                if (session.Socket != null && session.Socket.AddressFamily == AddressFamily.InterNetwork)
+                OnClose(CxString.Format("!SocketClose(IPv4) OnlineNum:{0}", _sessionManager.OnlineNum));
+                //关闭所有在线会话(IPv4)
+                ICollection<CxSession> onlines = _sessionManager.GetAllOnline();
+                List<CxSession> removeSessions = new List<CxSession>(onlines.Count);
+                foreach (var session in onlines)
                 {
-                    removes.Add(session);
+                    if (session.Socket != null && session.Socket.AddressFamily == AddressFamily.InterNetwork)
+                    {
+                        removeSessions.Add(session);
+                    }
                 }
-            }
-            foreach (var remove in removes)
-            {
-                StopSession(remove, CloseType.Close, "");
+                foreach (var session in removeSessions)
+                {
+                    //关闭会话
+                    session.Close();
+                }
             }
         }
         #endregion
@@ -226,7 +228,7 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// </summary>
         /// <param name="ip"></param>
         /// <param name="port"></param>
-        public void StartConnectIPv4(string ip, ushort port)
+        private void StartConnectIPv4(string ip, ushort port)
         {
             IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -278,19 +280,21 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// </summary>
         private void StopConnectIPv4()
         {
+            OnClose(CxString.Format("!SocketClose(IPv4) OnlineNum:{0}", _sessionManager.OnlineNum));
             //关闭所有在线会话(IPv4)
             ICollection<CxSession> onlines = _sessionManager.GetAllOnline();
-            List<CxSession> removes = new List<CxSession>(onlines.Count);
+            List<CxSession> removeSessions = new List<CxSession>(onlines.Count);
             foreach (var session in onlines)
             {
                 if (session.Socket != null && session.Socket.AddressFamily == AddressFamily.InterNetwork)
                 {
-                    removes.Add(session);
+                    removeSessions.Add(session);
                 }
             }
-            foreach (var remove in removes)
+            foreach (var session in removeSessions)
             {
-                StopSession(remove, CloseType.Close, "");
+                //关闭会话
+                session.Close();
             }
         }
         #endregion
@@ -334,6 +338,7 @@ namespace CxRouRou.Net.Sockets.Tcp
         {
             CxSession session = (CxSession)socketAsyncEventArgs.UserToken;
             CloseType closeType = CloseType.BeClose;
+            string message = "远程端已关闭连接";
             if (socketAsyncEventArgs.SocketError == SocketError.Success)
             {
                 if (socketAsyncEventArgs.BytesTransferred > 0)
@@ -352,13 +357,14 @@ namespace CxRouRou.Net.Sockets.Tcp
             {
                 //主动关闭
                 closeType = CloseType.Close;
+                message = "Socket 已关闭";
             }
             else
             {
                 session.Close();
             }
             PushReceiveSaea(socketAsyncEventArgs);
-            StopSession(session, closeType, "");
+            StopSession(session, closeType, message);
         }
         #endregion
         #region SaeaPool
@@ -441,22 +447,18 @@ namespace CxRouRou.Net.Sockets.Tcp
                 socketAsyncEventArgs = PopReceiveSaea();
                 socketAsyncEventArgs.UserToken = session;
             }
+            socketAsyncEventArgs.SetBuffer(session.Buffer, session.Offset, session.Buffer.Length - session.Offset);
             try
             {
-                socketAsyncEventArgs.SetBuffer(session.Buffer, session.Offset, session.Buffer.Length - session.Offset);
                 if (!session.Socket.ReceiveAsync(socketAsyncEventArgs))
                 {
                     ReceiveCallBack(session.Socket, socketAsyncEventArgs);
                 }
             }
-            catch (ArgumentOutOfRangeException e)
-            {
-                StopSession(session, CloseType.ExceptionClose, e.Message);
-            }
             catch
             {
                 //主动关闭的
-                StopSession(session, CloseType.Close, "");
+                StopSession(session, CloseType.Close, "Socket 已关闭");
             }
         }
         /// <summary>
@@ -467,10 +469,10 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// <param name="message"></param>
         private void StopSession(CxSession session, CloseType closeType, string message)
         {
+            //回收会话需要ID支持
             uint id = session.ID;
-            session.Close();
             session.Clear();
-            _sessionManager.Push(session);
+            _sessionManager.Push(id, session);
             OnLossConnection(id, closeType, message);
         }
         /// <summary>
@@ -496,6 +498,16 @@ namespace CxRouRou.Net.Sockets.Tcp
                 session.Close();
             }
         }
+        /// <summary>
+        /// 获取在线数量
+        /// </summary>
+        public int OnlineNum
+        {
+            get
+            {
+                return _sessionManager.OnlineNum;
+            }
+        }
         #endregion
         #region Virtual Method
         /// <summary>
@@ -514,20 +526,10 @@ namespace CxRouRou.Net.Sockets.Tcp
         {
         }
         /// <summary>
-        /// 当连接成功时
+        /// 当接手连接失败
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="addr"></param>
-        protected virtual void OnConnetSuccess(uint id, string addr)
-        {
-
-        }
-        /// <summary>
-        /// 当连接失败时
-        /// </summary>
-        /// <param name="addr"></param>
-        /// <param name="error"></param>
-        protected virtual void OnConnetFail(string addr, string error)
+        /// <param name="message"></param>
+        protected virtual void OnAcceptFail(string message)
         {
 
         }
@@ -535,18 +537,27 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// 当接受到连接时
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="addr"></param>
-        protected virtual void OnGetConnection(uint id, string addr)
+        /// <param name="address"></param>
+        protected virtual void OnAcceptSuccess(uint id, string address)
         {
         }
         /// <summary>
-        /// 当收到数据时
+        /// 当连接成功时
         /// </summary>
-        /// <param name="receiveData"></param>
-        /// <param name="length"></param>
-        private void OnReceiveData(IReceiveData receiveData, int length)
+        /// <param name="id"></param>
+        /// <param name="address"></param>
+        protected virtual void OnConnetSuccess(uint id, string address)
         {
-            receiveData.Offset = 0;
+
+        }
+        /// <summary>
+        /// 当连接失败时
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="error"></param>
+        protected virtual void OnConnetFail(string address, string error)
+        {
+
         }
         /// <summary>
         /// 当连接断开时
@@ -556,6 +567,15 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// <param name="closeType"></param>
         protected virtual void OnLossConnection(uint id, CloseType closeType, string message)
         {
+        }
+        /// <summary>
+        /// 当收到数据时
+        /// </summary>
+        /// <param name="receiveData"></param>
+        /// <param name="length"></param>
+        protected virtual void OnReceiveData(IReceiveData receiveData, int length)
+        {
+            receiveData.Offset = 0;
         }
         /// <summary>
         /// 当关闭时

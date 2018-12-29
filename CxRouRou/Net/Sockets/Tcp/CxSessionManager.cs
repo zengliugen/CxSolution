@@ -1,8 +1,8 @@
-﻿using CxRouRou.Collections;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
+using CxRouRou.Collections;
 
 namespace CxRouRou.Net.Sockets.Tcp
 {
@@ -67,8 +67,9 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// <summary>
         /// 回收一个会话
         /// </summary>
+        /// <param name="id"></param>
         /// <param name="session"></param>
-        internal void Push(CxSession session)
+        internal void Push(uint id, CxSession session)
         {
             if (session == null)
             {
@@ -76,7 +77,6 @@ namespace CxRouRou.Net.Sockets.Tcp
             }
             lock (_syncLock)
             {
-                uint id = session.ID;
                 _sessionPool.Push(session);
                 _onlines.Remove(id);
             }
