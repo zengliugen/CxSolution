@@ -375,7 +375,7 @@ namespace CxRouRou.Collections
         {
             if (value.Length > ushort.MaxValue)
             {
-                throw new ArgumentOutOfRangeException("Push byte array fail, array lenght greater than ushort.MaxValue");
+                throw new ArgumentOutOfRangeException("value", "value数组长度不可大于65535");
             }
             Push((ushort)value.Length);
             Append(value);
@@ -619,7 +619,7 @@ namespace CxRouRou.Collections
         /// <returns></returns>
         public virtual byte[] Pop_bytes()
         {
-            var length = Pop_ushort();
+            ushort length = Pop_ushort();
             return GetBytes(length);
         }
         /// <summary>
