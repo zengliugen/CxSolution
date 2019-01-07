@@ -4,6 +4,9 @@ using System.Text;
 
 namespace CxRouRou.Collections
 {
+    /// <summary>
+    /// 数组操作
+    /// </summary>
     public static class CxArray
     {
         /// <summary>
@@ -29,60 +32,37 @@ namespace CxRouRou.Collections
             return ts;
         }
         /// <summary>
-        /// 数组转字符串
+        /// 获取数组的一部分
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="source"></param>
+        /// <param name="index"></param>
+        /// <param name="length"></param>
         /// <returns></returns>
-        public static string ToStringEx<T>(this T[] source)
+        public static T[] GetArray<T>(this T[] source, long index, long length)
         {
             if (source == null)
             {
                 throw new ArgumentNullException();
             }
-            StringBuilder sb = new StringBuilder();
-            sb.Append("{");
-            int length = source.Length;
-            for (int i = 0; i < length; i++)
+            if (index < 0 || index + length > source.LongLength)
             {
-                sb.Append(source[i]);
-                if (i < length - 1)
-                {
-                    sb.Append(",");
-                }
+                throw new ArgumentOutOfRangeException();
             }
-            sb.Append("}");
-            return sb.ToString();
+            T[] ts = new T[length];
+            Array.Copy(source, index, ts, 0, length);
+            return ts;
         }
         /// <summary>
-        /// 比较数组是否相同
+        /// 创建随机byte数组
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="source"></param>
-        /// <param name="target"></param>
+        /// <param name="length"></param>
         /// <returns></returns>
-        public static bool EqualsEx<T>(this T[] source, T[] target)
+        public static byte[] CreateRandomByte(int length)
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException();
-            }
-            if (target == null)
-            {
-                return false;
-            }
-            if (source.Length != target.Length)
-            {
-                return false;
-            }
-            for (int i = 0; i < source.Length; i++)
-            {
-                if (source[i].Equals(target[i]) == false)
-                {
-                    return false;
-                }
-            }
-            return true;
+            byte[] bytes = new byte[length];
+            new Random().NextBytes(bytes);
+            return bytes;
         }
     }
 }

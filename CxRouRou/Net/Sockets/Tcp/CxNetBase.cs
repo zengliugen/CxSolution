@@ -13,8 +13,14 @@ namespace CxRouRou.Net.Sockets.Tcp
     /// </summary>
     public enum CloseType
     {
-        Close,//主动关闭
-        BeClose,//被关闭
+        /// <summary>
+        /// 主动关闭
+        /// </summary>
+        Close,
+        /// <summary>
+        /// 被关闭
+        /// </summary>
+        BeClose,
     }
     /// <summary>
     /// 网络基类
@@ -40,7 +46,7 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// <summary>
         /// 网络配置
         /// </summary>
-        private readonly CxNetConfig _netConfig;
+        protected readonly CxNetConfig _netConfig;
         /// <summary>
         ///  是否初始化标记
         /// </summary>
@@ -57,8 +63,11 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// </summary>
         /// <param name="poolSize"></param>
         /// <param name="receiveBufferSize"></param>
+        /// <param name="receiveTimeout"></param>
         /// <param name="sendBufferSize"></param>
-        public void SetNetConfig(int poolSize, ushort receiveBufferSize, int receiveTimeout, ushort sendBufferSize, int sendTimeout, bool listenIPv6)
+        /// <param name="sendTimeout"></param>
+        /// <param name="listenIPv6"></param>
+        public virtual void SetNetConfig(int poolSize = 1000, int receiveBufferSize = 8196, int receiveTimeout = 20000, int sendBufferSize = 1400, int sendTimeout = 20000, bool listenIPv6 = false)
         {
             if (_isIntFlag != 0)
             {
@@ -86,23 +95,23 @@ namespace CxRouRou.Net.Sockets.Tcp
         }
         #region Accept
         /// <summary>
-        /// 开始接受连接
+        /// 开始监听接收连接
         /// </summary>
         /// <param name="port"></param>
-        public void StartAccept(ushort port)
+        public void StartListenAccept(ushort port)
         {
             Init();
-            StartAcceptIPv4(port);
+            StartListenAcceptIPv4(port);
         }
         /// <summary>
-        /// 开始接受连接(IPv4)
+        /// 开始监听接受连接(IPv4)
         /// </summary>
         /// <param name="port"></param>
-        private void StartAcceptIPv4(ushort port)
+        private void StartListenAcceptIPv4(ushort port)
         {
             if (_socket != null)
             {
-                OnStartFail(port, "已经开始监听(IPv4)");
+                OnStartListenAcceptFail(port, "已经开始监听(IPv4)");
                 return;
             }
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -118,19 +127,19 @@ namespace CxRouRou.Net.Sockets.Tcp
                 {
                     AcceptCallbackIPv4(_socket, socketAsyncEventArgs);
                 }
-                OnStartSuccess(port, "监听成功(IPv4)");
+                OnStartListenAcceptSuccess(port, "监听成功(IPv4)");
             }
             catch (Exception e)
             {
                 PushAcceptSaea(socketAsyncEventArgs);
-                OnStartFail(port, e.Message);
+                OnStartListenAcceptFail(port, e.Message);
                 StopAcceptIPv4();
             }
         }
         /// <summary>
         /// 接受连接回调(IPv4)
         /// </summary>
-        /// <param name="socket"></param>
+        /// <param name="sender"></param>
         /// <param name="socketAsyncEventArgs"></param>
         private void AcceptCallbackIPv4(object sender, SocketAsyncEventArgs socketAsyncEventArgs)
         {
@@ -251,7 +260,7 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// 连接回调(IPv4)
         /// </summary>
         /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <param name="socketAsyncEventArgs"></param>
         private void ConnectCallbackIPv4(object sender, SocketAsyncEventArgs socketAsyncEventArgs)
         {
             Socket socket = (Socket)sender;
@@ -493,7 +502,12 @@ namespace CxRouRou.Net.Sockets.Tcp
         public void CloseAll()
         {
             ICollection<CxSession> onlines = _sessionManager.GetAllOnline();
+            List<CxSession> removeSessions = new List<CxSession>(onlines.Count);
             foreach (var session in onlines)
+            {
+                removeSessions.Add(session);
+            }
+            foreach (var session in removeSessions)
             {
                 session.Close();
             }
@@ -515,18 +529,19 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// </summary>
         /// <param name="port"></param>
         /// <param name="error"></param>
-        protected virtual void OnStartFail(ushort port, string error)
+        protected virtual void OnStartListenAcceptFail(ushort port, string error)
         {
         }
         /// <summary>
         /// 当启动成功时
         /// </summary>
         /// <param name="port"></param>
-        protected virtual void OnStartSuccess(ushort port, string message)
+        /// <param name="message"></param>
+        protected virtual void OnStartListenAcceptSuccess(ushort port, string message)
         {
         }
         /// <summary>
-        /// 当接手连接失败
+        /// 当接受连接失败
         /// </summary>
         /// <param name="message"></param>
         protected virtual void OnAcceptFail(string message)
@@ -563,8 +578,8 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// 当连接断开时
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="type"></param>
         /// <param name="closeType"></param>
+        /// <param name="message"></param>
         protected virtual void OnLossConnection(uint id, CloseType closeType, string message)
         {
         }

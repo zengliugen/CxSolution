@@ -100,9 +100,19 @@ namespace CxRouRou.Collections
     public class CxThreadSafePool<T> : CxPool<T>
     {
         readonly object _syncObject = new object();
+        /// <summary>
+        /// 初始化
+        /// </summary>
+        /// <param name="size"></param>
+        /// <param name="ctor"></param>
+        /// <param name="_reset"></param>
         public CxThreadSafePool(int size, Func<T> ctor = null, Action<T> _reset = null) : base(size, ctor, _reset)
         {
         }
+        /// <summary>
+        /// 取得一个对象
+        /// </summary>
+        /// <returns></returns>
         public override T Pop()
         {
             lock (_syncObject)
@@ -110,6 +120,10 @@ namespace CxRouRou.Collections
                 return base.Pop();
             }
         }
+        /// <summary>
+        /// 回收一个对象
+        /// </summary>
+        /// <param name="t"></param>
         public override void Push(T t)
         {
             lock (_syncObject)
@@ -117,6 +131,9 @@ namespace CxRouRou.Collections
                 base.Push(t);
             }
         }
+        /// <summary>
+        /// 对象个数
+        /// </summary>
         public override int Count
         {
             get

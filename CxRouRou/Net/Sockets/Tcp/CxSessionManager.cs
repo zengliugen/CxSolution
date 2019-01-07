@@ -32,9 +32,8 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// </summary>
         /// <param name="poolSize"></param>
         /// <param name="receiveBufferSize"></param>
-        /// <param name="receiveTimeout"></param>
         /// <param name="saeaPool"></param>
-        public CxSessionManager(int poolSize, ushort receiveBufferSize, CxPool<SocketAsyncEventArgs> saeaPool)
+        public CxSessionManager(int poolSize, int receiveBufferSize, CxPool<SocketAsyncEventArgs> saeaPool)
         {
             _sessionPool = new CxPool<CxSession>(poolSize, () =>
             {

@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 using CxRouRou.Collections;
 using CxRouRou.Util;
 using CXRouRouTest.Collections;
+using CXRouRouTest.Net.Sockets.Tcp;
+using System.Xml;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization;
+using System.IO;
+using CxRouRou.Attributes;
 
 namespace CXRouRouTest
 {
@@ -13,10 +19,11 @@ namespace CXRouRouTest
     {
         static void Main(string[] args)
         {
-            //CxByteBufferTest byteBufferTest = new CxByteBufferTest("CxByteBufferTest");
-            //byteBufferTest.Run();
-            uint value = uint.MaxValue;
-            CxConsole.WriteLine(value + 1);
+            CxByteBufferTest byteBufferTest = new CxByteBufferTest("CxByteBufferTest");
+            byteBufferTest.Run();
+            //CxNetTest netTest = new CxNetTest("CxNetTest");
+            //netTest.Run();
+
             Console.ReadKey();
         }
     }

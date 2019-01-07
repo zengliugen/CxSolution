@@ -52,7 +52,7 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// </summary>
         /// <param name="receiveBufferSize"></param>
         /// <param name="saeaPool"></param>
-        public CxSession(ushort receiveBufferSize, CxPool<SocketAsyncEventArgs> saeaPool)
+        public CxSession(int receiveBufferSize, CxPool<SocketAsyncEventArgs> saeaPool)
         {
             _saeaPool = saeaPool;
             Buffer = new byte[receiveBufferSize];
@@ -66,7 +66,9 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// </summary>
         /// <param name="socket"></param>
         /// <param name="sendBufferSize"></param>
-        internal void SetSocket(Socket socket, ushort sendBufferSize, int sendTimeout, int receiveTimeout)
+        /// <param name="sendTimeout"></param>
+        /// <param name="receiveTimeout"></param>
+        internal void SetSocket(Socket socket, int sendBufferSize, int sendTimeout, int receiveTimeout)
         {
             Socket = socket;
             Socket.SendBufferSize = sendBufferSize;
@@ -102,7 +104,7 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// <summary>
         /// 异步发送
         /// </summary>
-        /// <param name="bs"></param>
+        /// <param name="data"></param>
         /// <param name="index"></param>
         /// <param name="length"></param>
         internal void SendAsync(byte[] data, int index, int length)
@@ -128,7 +130,7 @@ namespace CxRouRou.Net.Sockets.Tcp
             {
                 lock (_syncLock)
                 {
-                    if (_sendList.Count > 0 && _sendSaea.BufferList == null)
+                    if (_sendList.Peek().Count > 0 && _sendSaea.BufferList == null)
                     {
                         _isSend = true;
                         _sendSaea.BufferList = _sendList.Dequeue();
@@ -157,6 +159,7 @@ namespace CxRouRou.Net.Sockets.Tcp
                 _sendSaea = null;
             }
             tempSendSaea.Completed -= SendCallBack;
+            tempSendSaea.BufferList.Clear();
             tempSendSaea.BufferList = null;
             _saeaPool.Push(tempSendSaea);
         }

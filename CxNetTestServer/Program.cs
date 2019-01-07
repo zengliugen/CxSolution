@@ -22,13 +22,20 @@ namespace CxNetTestServer
                 switch (cmd)
                 {
                     case "accept":
-                        net.StartAccept(12345);
+                        net.StartListenAccept(12345);
                         break;
                     case "stop":
                         net.StopAccept();
                         break;
                     case "close":
-                        net.Close(ushort.Parse(cmds[1]));
+                        if (cmds.Length > 1)
+                        {
+                            net.Close(ushort.Parse(cmds[1]));
+                        }
+                        else
+                        {
+                            net.CloseAll();
+                        }
                         break;
                     case "online":
                         CxConsole.WriteLine(net.OnlineNum);
@@ -42,9 +49,9 @@ namespace CxNetTestServer
         }
         class ServerNet : CxNet
         {
-            protected override void OnStartSuccess(ushort port, string message)
+            protected override void OnStartListenAcceptSuccess(ushort port, string message)
             {
-                base.OnStartSuccess(port, message);
+                base.OnStartListenAcceptSuccess(port, message);
                 CxConsole.WriteLine("启动服务完成 port:{0} message:{1}", port, message);
             }
             protected override void OnAcceptSuccess(uint id, string address)

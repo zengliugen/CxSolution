@@ -1,5 +1,11 @@
-﻿using System;
+﻿//#undef DEBUG
+using System;
 using System.Text;
+using System.Collections;
+using CxRouRou.Util;
+using System.Collections.Generic;
+using System.Reflection;
+using CxRouRou.Attributes;
 
 namespace CxRouRou.Collections
 {
@@ -85,7 +91,7 @@ namespace CxRouRou.Collections
         /// 初始化
         /// </summary>
         /// <param name="capacity">容量</param>
-        public CxByteBuffer(int capacity)
+        public CxByteBuffer(int capacity = 4)
         {
             Data = EmptyData;
             Capacity = capacity;
@@ -213,6 +219,37 @@ namespace CxRouRou.Collections
         public virtual byte[] GetBytesAt(int index, int length)
         {
             return Data.GetArray(index, length);
+        }
+        /// <summary>
+        /// 比较
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public override bool Equals(object obj)
+        {
+            if (!(obj is CxByteBuffer))
+            {
+                return false;
+            }
+            if (!(obj is CxByteBuffer other))
+            {
+                return false;
+            }
+            return GetBytesAt(0, Length).EqualsEx(other.GetBytesAt(0, other.Length));
+        }
+        /// <summary>
+        /// 获取HashCode(使用当前数据进行计算)
+        /// </summary>
+        /// <returns></returns>
+        public override int GetHashCode()
+        {
+            int hashCode = 0;
+            byte[] data = GetBytesAt(0, Length);
+            foreach (var d in data)
+            {
+                hashCode += d.GetHashCode();
+            }
+            return hashCode;
         }
         #region 压入数据
         /// <summary>
@@ -375,7 +412,7 @@ namespace CxRouRou.Collections
         {
             if (value.Length > ushort.MaxValue)
             {
-                throw new ArgumentOutOfRangeException("value", "value数组长度不可大于65535");
+                throw new ArgumentOutOfRangeException("value", CxString.Format("value数组长度不可大于{0}", ushort.MaxValue));
             }
             Push((ushort)value.Length);
             Append(value);
@@ -436,6 +473,24 @@ namespace CxRouRou.Collections
             return Push((char)value);
         }
         /// <summary>
+        /// 压入字面常量int
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public virtual CxByteBuffer Push_int(int value)
+        {
+            return Push(value);
+        }
+        /// <summary>
+        /// 压入字面常量uint
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public virtual CxByteBuffer Push_uint(int value)
+        {
+            return Push((uint)value);
+        }
+        /// <summary>
         /// 压入字面常量float
         /// </summary>
         /// <param name="value"></param>
@@ -490,7 +545,6 @@ namespace CxRouRou.Collections
             return Push((double)value);
         }
         #endregion
-
         #region 弹出数据
         /// <summary>
         /// 弹出byte
@@ -629,6 +683,461 @@ namespace CxRouRou.Collections
         public virtual string Pop_string()
         {
             return StringEncoding.GetString(Pop_bytes());
+        }
+        #endregion
+        #region 自动压入弹出
+        /// <summary>
+        /// 是否处理私有字段
+        /// </summary>
+        public static bool IsHandlePrivateField;
+        /// <summary>
+        /// 是否处理私有属性
+        /// </summary>
+        public static bool IsHandlePrivateProperty;
+        /// <summary>
+        /// 类型比较
+        /// </summary>
+        private static readonly Type byteType = typeof(byte);
+        private static readonly Type stringType = typeof(string);
+        private static readonly Type IListType = typeof(IList);
+        private static readonly Type IDictionaryType = typeof(IDictionary);
+        /// <summary>
+        /// 特性判断类型
+        /// </summary>
+        private static readonly Type ByteBufferAttributeType = typeof(ByteBufferAttribute);
+#if DEBUG
+        /// <summary>
+        /// 自动压入
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="flags"></param>
+        /// <returns></returns>
+        public virtual CxByteBuffer AutoPush(object obj, Dictionary<object, int> flags = null)
+#else
+        /// <summary>
+        /// 自动压入
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public virtual CxByteBuffer AutoPush(object obj)
+#endif
+        {
+            Type type = obj.GetType();
+            TypeInfo typeInfo = type as TypeInfo;
+            if (obj == null)
+            {
+                throw new NullReferenceException("压入对象不可为空");
+            }
+#if DEBUG
+            if (flags == null)
+            {
+                flags = new Dictionary<object, int>();
+            }
+            if (flags.ContainsKey(obj))
+            {
+                throw new Exception("压入对象包含了循环引用");
+            }
+#endif
+            //值类型
+            if (type.IsValueType)
+            {
+                //基础类型
+                if (type.IsPrimitive)
+                {
+                    switch (type.Name)
+                    {
+                        case "Byte":
+                            Push((byte)obj);
+                            break;
+                        case "SByte":
+                            Push((sbyte)obj);
+                            break;
+                        case "Boolean":
+                            Push((bool)obj);
+                            break;
+                        case "Int16":
+                            Push((short)obj);
+                            break;
+                        case "UInt16":
+                            Push((ushort)obj);
+                            break;
+                        case "Char":
+                            Push((char)obj);
+                            break;
+                        case "Int32":
+                            Push((int)obj);
+                            break;
+                        case "UInt32":
+                            Push((uint)obj);
+                            break;
+                        case "Single":
+                            Push((float)obj);
+                            break;
+                        case "Int64":
+                            Push((long)obj);
+                            break;
+                        case "UInt64":
+                            Push((ulong)obj);
+                            break;
+                        case "Double":
+                            Push((double)obj);
+                            break;
+                        //无法解析的基础类型
+                        default:
+                            throw new Exception("自动压入失败，无法解析的基础类型");
+                    }
+                }
+                //枚举类型
+                else if (type.IsEnum)
+                {
+                    Push((int)obj);
+                }
+                //结构体
+                else
+                {
+#if DEBUG
+                    AutoPushStructOrClass(ref typeInfo, ref obj, flags);
+#else
+                    AutoPushStructOrClass(ref typeInfo, ref obj);
+#endif
+                }
+            }
+            //类类型
+            else if (type.IsClass)
+            {
+                //Array
+                if (type.IsArray)
+                {
+#if DEBUG
+                    //保存标记，防止循环引用
+                    flags.Add(obj, 1);
+#endif
+                    if (obj is Array array)
+                    {
+                        Type elementType = type.GetElementType();
+                        //如果是byte数组，直接进行写入
+                        if (byteType.IsAssignableFrom(elementType))
+                        {
+                            Push((byte[])obj);
+                        }
+                        else
+                        {
+                            int length = array.Length;
+                            Push((ushort)length);
+                            for (int i = 0; i < length; i++)
+                            {
+#if DEBUG
+                                AutoPush(array.GetValue(i), flags);
+#else
+                                AutoPush(array.GetValue(i));
+#endif
+                            }
+                        }
+                    }
+                }
+                //string
+                else if (stringType.IsAssignableFrom(type))
+                {
+                    Push((string)obj);
+                }
+                //IList
+                else if (IListType.IsAssignableFrom(type))
+                {
+#if DEBUG
+                    //保存标记，防止循环引用
+                    flags.Add(obj, 1);
+#endif
+                    if (obj is IList list)
+                    {
+                        int count = list.Count;
+                        Push((ushort)count);
+                        for (int i = 0; i < count; i++)
+                        {
+#if DEBUG
+                            AutoPush(list[i], flags);
+#else
+                            AutoPush(list[i]);
+#endif
+                        }
+                    }
+                }
+                //IDictionary
+                else if (IDictionaryType.IsAssignableFrom(type))
+                {
+#if DEBUG
+                    //保存标记，防止循环引用
+                    flags.Add(obj, 1);
+#endif
+                    if (obj is IDictionary dictionary)
+                    {
+                        int count = dictionary.Count;
+                        Push((ushort)count);
+                        foreach (DictionaryEntry kv in dictionary)
+                        {
+#if DEBUG
+                            AutoPush(kv.Key, flags);
+                            AutoPush(kv.Value, flags);
+#else
+                            AutoPush(kv.Key);
+                            AutoPush(kv.Value);
+#endif
+                        }
+                    }
+                }
+                //其他类类型
+                else
+                {
+#if DEBUG
+                    AutoPushStructOrClass(ref typeInfo, ref obj, flags);
+#else
+                    AutoPushStructOrClass(ref typeInfo, ref obj);
+#endif
+                }
+
+            }
+            //其他类型(不处理的类型)
+            else
+            {
+
+            }
+            return this;
+        }
+#if DEBUG
+
+        /// <summary>
+        /// 自动压入结构体或类
+        /// </summary>
+        /// <param name="typeInfo"></param>
+        /// <param name="obj"></param>
+        /// <param name="flags"></param>
+        public virtual void AutoPushStructOrClass(ref TypeInfo typeInfo, ref Object obj, Dictionary<object, int> flags = null)
+#else
+        public virtual void AutoPushStructOrClass(ref TypeInfo typeInfo, ref Object obj, Dictionary<object, int> flags = null)
+#endif
+        {
+            //处理字段 仅处理具有ByteBufferAttribute特性的字段
+            List<FieldInfo> fieldInfoList = new List<FieldInfo>();
+            //此处获取的字段包含了public标记与private标记
+            fieldInfoList.AddRange(typeInfo.DeclaredFields);
+            fieldInfoList.Sort((l, r) =>
+            {
+                return l.Name.CompareTo(r.Name);
+            });
+            FieldInfo[] fieldInfos = fieldInfoList.ToArray();
+            for (int i = 0; i < fieldInfos.Length; i++)
+            {
+                FieldInfo fieldInfo = fieldInfos[i];
+                if (fieldInfo.GetCustomAttribute(ByteBufferAttributeType) is ByteBufferAttribute byteBufferAttribute && byteBufferAttribute.Handle)
+                {
+#if DEBUG
+                    AutoPush(fieldInfo.GetValue(obj), flags);
+#else
+                    AutoPush(fieldInfo.GetValue(obj));
+#endif
+                }
+            }
+            //处理属性 仅处理具有ByteBufferAttribute特性的属性
+            List<PropertyInfo> propertyInfoList = new List<PropertyInfo>();
+            //此处获取的属性包含了public标记与private标记
+            propertyInfoList.AddRange(typeInfo.DeclaredProperties);
+            propertyInfoList.Sort((l, r) =>
+            {
+                return l.Name.CompareTo(r.Name);
+            });
+            PropertyInfo[] propertyInfos = propertyInfoList.ToArray();
+            for (int i = 0; i < propertyInfos.Length; i++)
+            {
+                PropertyInfo propertyInfo = propertyInfos[i];
+                if (propertyInfo.GetCustomAttribute(ByteBufferAttributeType) is ByteBufferAttribute byteBufferAttribute && byteBufferAttribute.Handle)
+                {
+#if DEBUG
+                    AutoPush(propertyInfo.GetValue(obj), flags);
+#else
+                    AutoPush(propertyInfo.GetValue(obj));
+#endif
+                }
+            }
+        }
+        /// <summary>
+        /// 自动弹出
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public virtual object AutoPop(Type type)
+        {
+            if (type == null)
+            {
+                throw new ArgumentNullException("type", "参数不可为空");
+            }
+            object obj = null;
+            TypeInfo typeInfo = type as TypeInfo;
+            //值类型
+            if (type.IsValueType)
+            {
+                //基础类型
+                if (type.IsPrimitive)
+                {
+                    switch (type.Name)
+                    {
+                        case "Byte":
+                            obj = Pop_byte();
+                            break;
+                        case "SByte":
+                            obj = Pop_sbyte();
+                            break;
+                        case "Boolean":
+                            obj = Pop_bool();
+                            break;
+                        case "Int16":
+                            obj = Pop_short();
+                            break;
+                        case "UInt16":
+                            obj = Pop_ushort();
+                            break;
+                        case "Char":
+                            obj = Pop_char();
+                            break;
+                        case "Int32":
+                            obj = Pop_int();
+                            break;
+                        case "UInt32":
+                            obj = Pop_uint();
+                            break;
+                        case "Single":
+                            obj = Pop_float();
+                            break;
+                        case "Int64":
+                            obj = Pop_long();
+                            break;
+                        case "UInt64":
+                            obj = Pop_ulong();
+                            break;
+                        case "Double":
+                            obj = Pop_double();
+                            break;
+                        //无法解析的基础类型
+                        default:
+                            throw new Exception("自动压入失败，无法解析的基础类型");
+                    }
+                }
+                //枚举类型
+                else if (type.IsEnum)
+                {
+                    obj = Pop_int();
+                }
+                //结构体
+                else
+                {
+                    obj = Activator.CreateInstance(type);
+                    AutoPopStructOrClass(ref typeInfo, ref obj);
+                }
+            }
+            //类类型
+            else if (type.IsClass)
+            {
+                //Array
+                if (type.IsArray)
+                {
+                    Type elementType = type.GetElementType();
+                    if (byteType.IsAssignableFrom(elementType))
+                    {
+                        obj = Pop_bytes();
+                    }
+                    else
+                    {
+                        int length = Pop_ushort();
+                        Array array = Array.CreateInstance(elementType, length);
+                        for (int i = 0; i < length; i++)
+                        {
+                            array.SetValue(AutoPop(elementType), i);
+                        }
+                        obj = array;
+                    }
+                }
+                //string
+                else if (stringType.IsAssignableFrom(type))
+                {
+                    obj = Pop_string();
+                }
+                //IList
+                else if (IListType.IsAssignableFrom(type))
+                {
+                    Type[] genericArguments = type.GetGenericArguments();
+                    int count = Pop_ushort();
+                    IList list = Activator.CreateInstance(type) as IList;
+                    for (int i = 0; i < count; i++)
+                    {
+                        list.Add(AutoPop(genericArguments[0]));
+                    }
+                    obj = list;
+                }
+                //IDictionary
+                else if (IDictionaryType.IsAssignableFrom(type))
+                {
+                    Type[] genericArguments = type.GetGenericArguments();
+                    int count = Pop_ushort();
+                    IDictionary dictionary = Activator.CreateInstance(type) as IDictionary;
+                    for (int i = 0; i < count; i++)
+                    {
+                        dictionary.Add(AutoPop(genericArguments[0]), AutoPop(genericArguments[1]));
+                    }
+                    obj = dictionary;
+                }
+                //其他类类型
+                else
+                {
+                    obj = Activator.CreateInstance(type);
+                    AutoPopStructOrClass(ref typeInfo, ref obj);
+                }
+            }
+            //其他类型(不处理的类型)
+            else
+            {
+
+            }
+            return obj;
+        }
+        /// <summary>
+        /// 自动弹出结构体或类
+        /// </summary>
+        /// <param name="typeInfo"></param>
+        /// <param name="obj"></param>
+        public virtual void AutoPopStructOrClass(ref TypeInfo typeInfo, ref object obj)
+        {
+            //处理字段 仅处理具有ByteBufferAttribute特性的字段
+            List<FieldInfo> fieldInfoList = new List<FieldInfo>();
+            //此处获取的字段包含了public标记与private标记
+            fieldInfoList.AddRange(typeInfo.DeclaredFields);
+            fieldInfoList.Sort((l, r) =>
+            {
+                return l.Name.CompareTo(r.Name);
+            });
+            FieldInfo[] fieldInfos = fieldInfoList.ToArray();
+            for (int i = 0; i < fieldInfos.Length; i++)
+            {
+                FieldInfo fieldInfo = fieldInfos[i];
+                if (fieldInfo.GetCustomAttribute(ByteBufferAttributeType) is ByteBufferAttribute byteBufferAttribute && byteBufferAttribute.Handle)
+                {
+                    fieldInfo.SetValue(obj, AutoPop(fieldInfo.FieldType));
+                }
+            }
+            //处理属性 仅处理具有ByteBufferAttribute特性的属性
+            List<PropertyInfo> propertyInfoList = new List<PropertyInfo>();
+            //此处获取的属性包含了public标记与private标记
+            propertyInfoList.AddRange(typeInfo.DeclaredProperties);
+            propertyInfoList.Sort((l, r) =>
+            {
+                return l.Name.CompareTo(r.Name);
+            });
+            PropertyInfo[] propertyInfos = propertyInfoList.ToArray();
+            for (int i = 0; i < propertyInfos.Length; i++)
+            {
+                PropertyInfo propertyInfo = propertyInfos[i];
+                if (propertyInfo.GetCustomAttribute(ByteBufferAttributeType) is ByteBufferAttribute byteBufferAttribute && byteBufferAttribute.Handle)
+                {
+                    propertyInfo.SetValue(obj, AutoPop(propertyInfo.PropertyType));
+                }
+            }
         }
         #endregion
     }

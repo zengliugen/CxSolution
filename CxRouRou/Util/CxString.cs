@@ -9,6 +9,12 @@ namespace CxRouRou.Util
     /// </summary>
     public static class CxString
     {
+        /// <summary>
+        /// 格式化
+        /// </summary>
+        /// <param name="format"></param>
+        /// <param name="arg"></param>
+        /// <returns></returns>
         public static string Format(string format, params object[] arg)
         {
             if (arg.Length == 0)

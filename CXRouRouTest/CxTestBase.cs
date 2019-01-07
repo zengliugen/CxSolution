@@ -10,7 +10,7 @@ namespace CXRouRouTest
     /// <summary>
     /// 测试基类
     /// </summary>
-    public abstract class CxTestBase
+    public abstract class CxTestBase : IDisposable
     {
         /// <summary>
         /// 测试名称
@@ -52,5 +52,7 @@ namespace CXRouRouTest
                 PrintL("测试:{0} 未通过", TestName);
             }
         }
+
+        public abstract void Dispose();
     }
 }

@@ -16,17 +16,17 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// <summary>
         /// 接收数据缓冲区大小 默认8196
         /// </summary>
-        public ushort ReceiveBufferSize { get; set; }
+        public int ReceiveBufferSize { get; set; }
         /// <summary>
-        /// 接收数据超时间 单位毫秒 默认20秒
+        /// 接收数据超时时间 单位毫秒 默认20秒
         /// </summary>
         public int ReceiveTimeout { get; set; }
         /// <summary>
-        /// 发送数据缓冲区大小 默认1400 (以太网MTU一般为 1500) 防止数据太大导致MTU分片
+        /// 发送数据缓冲区大小 默认1400 (以太网MTU一般为 1500) 防止数据太大导致MTU分片(如需发送大数据，建议自主拆包发送)
         /// </summary>
-        public ushort SendBufferSize { get; set; }
+        public int SendBufferSize { get; set; }
         /// <summary>
-        /// 接收数据超时间 单位毫秒 默认20秒
+        /// 发送数据超时时间 单位毫秒 默认20秒
         /// </summary>
         public int SendTimeout { get; set; }
         /// <summary>
