@@ -15,14 +15,23 @@ namespace CXRouRouTest.Net.Sockets.Tcp
     /// </summary>
     public class CxNetTest : CxTestBase
     {
+        /// <summary>
+        /// 初始化
+        /// </summary>
+        /// <param name="testName"></param>
         public CxNetTest(string testName) : base(testName)
         {
         }
-
+        /// <summary>
+        /// 释放非托管资源
+        /// </summary>
         public override void Dispose()
         {
         }
-
+        /// <summary>
+        /// 测试内容
+        /// </summary>
+        /// <returns></returns>
         public override bool Test()
         {
             ushort port = 12345;

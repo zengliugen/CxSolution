@@ -52,7 +52,9 @@ namespace CXRouRouTest
                 PrintL("测试:{0} 未通过", TestName);
             }
         }
-
+        /// <summary>
+        /// 释放非托管资源
+        /// </summary>
         public abstract void Dispose();
     }
 }

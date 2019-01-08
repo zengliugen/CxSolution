@@ -912,6 +912,12 @@ namespace CxRouRou.Collections
         /// <param name="flags"></param>
         public virtual void AutoPushStructOrClass(ref TypeInfo typeInfo, ref Object obj, Dictionary<object, int> flags = null)
 #else
+        /// <summary>
+        /// 自动压入结构体或类
+        /// </summary>
+        /// <param name="typeInfo"></param>
+        /// <param name="obj"></param>
+        /// <param name="flags"></param>
         public virtual void AutoPushStructOrClass(ref TypeInfo typeInfo, ref Object obj, Dictionary<object, int> flags = null)
 #endif
         {
@@ -961,7 +967,7 @@ namespace CxRouRou.Collections
         /// <summary>
         /// 自动弹出
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <param name="type"></param>
         /// <returns></returns>
         public virtual object AutoPop(Type type)
         {

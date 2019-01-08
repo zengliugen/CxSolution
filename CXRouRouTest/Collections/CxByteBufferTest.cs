@@ -9,16 +9,28 @@ using System.Threading.Tasks;
 
 namespace CXRouRouTest.Collections
 {
+    /// <summary>
+    /// CxByteBuffer测试
+    /// </summary>
     public class CxByteBufferTest : CxTestBase
     {
+        /// <summary>
+        /// 初始化
+        /// </summary>
+        /// <param name="testName"></param>
         public CxByteBufferTest(string testName) : base(testName)
         {
         }
-
+        /// <summary>
+        /// 释放非托管资源
+        /// </summary>
         public override void Dispose()
         {
         }
-
+        /// <summary>
+        /// 测试内容
+        /// </summary>
+        /// <returns></returns>
         public override bool Test()
         {
             PrintL("---------------------------------------------");
