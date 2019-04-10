@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics;
-namespace CXRouRouTest.Net.Sockets.Tcp
+namespace CxRouRouTest.Net.Sockets.Tcp
 {
     /// <summary>
     /// 网络测试

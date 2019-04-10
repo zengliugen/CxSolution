@@ -94,7 +94,7 @@ namespace CxRouRou.Collections
         }
     }
     /// <summary>
-    /// 对象池()线程安全
+    /// 对象池(线程安全)
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class CxThreadSafePool<T> : CxPool<T>

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CXRouRouTest.Collections
+namespace CxRouRouTest.Collections
 {
     /// <summary>
     /// CxByteBuffer测试
