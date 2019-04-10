@@ -8,7 +8,7 @@ namespace CxRouRou.Attributes
     /// ByteBuffer自动压入弹出属性
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-    public class ByteBufferAttribute : Attribute
+    public class AutoByteBufferAttribute : Attribute
     {
         /// <summary>
         /// 是否处理
@@ -18,7 +18,7 @@ namespace CxRouRou.Attributes
         /// 初始化
         /// </summary>
         /// <param name="handle"></param>
-        public ByteBufferAttribute(bool handle)
+        public AutoByteBufferAttribute(bool handle)
         {
             Handle = handle;
         }

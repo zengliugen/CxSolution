@@ -704,7 +704,7 @@ namespace CxRouRou.Collections
         /// <summary>
         /// 特性判断类型
         /// </summary>
-        private static readonly Type ByteBufferAttributeType = typeof(ByteBufferAttribute);
+        private static readonly Type ByteBufferAttributeType = typeof(AutoByteBufferAttribute);
 #if DEBUG
         /// <summary>
         /// 自动压入
@@ -933,7 +933,7 @@ namespace CxRouRou.Collections
             for (int i = 0; i < fieldInfos.Length; i++)
             {
                 FieldInfo fieldInfo = fieldInfos[i];
-                if (fieldInfo.GetCustomAttribute(ByteBufferAttributeType) is ByteBufferAttribute byteBufferAttribute && byteBufferAttribute.Handle)
+                if (fieldInfo.GetCustomAttribute(ByteBufferAttributeType) is AutoByteBufferAttribute byteBufferAttribute && byteBufferAttribute.Handle)
                 {
 #if DEBUG
                     AutoPush(fieldInfo.GetValue(obj), flags);
@@ -954,7 +954,7 @@ namespace CxRouRou.Collections
             for (int i = 0; i < propertyInfos.Length; i++)
             {
                 PropertyInfo propertyInfo = propertyInfos[i];
-                if (propertyInfo.GetCustomAttribute(ByteBufferAttributeType) is ByteBufferAttribute byteBufferAttribute && byteBufferAttribute.Handle)
+                if (propertyInfo.GetCustomAttribute(ByteBufferAttributeType) is AutoByteBufferAttribute byteBufferAttribute && byteBufferAttribute.Handle)
                 {
 #if DEBUG
                     AutoPush(propertyInfo.GetValue(obj), flags);
@@ -1122,7 +1122,7 @@ namespace CxRouRou.Collections
             for (int i = 0; i < fieldInfos.Length; i++)
             {
                 FieldInfo fieldInfo = fieldInfos[i];
-                if (fieldInfo.GetCustomAttribute(ByteBufferAttributeType) is ByteBufferAttribute byteBufferAttribute && byteBufferAttribute.Handle)
+                if (fieldInfo.GetCustomAttribute(ByteBufferAttributeType) is AutoByteBufferAttribute byteBufferAttribute && byteBufferAttribute.Handle)
                 {
                     fieldInfo.SetValue(obj, AutoPop(fieldInfo.FieldType));
                 }
@@ -1139,7 +1139,7 @@ namespace CxRouRou.Collections
             for (int i = 0; i < propertyInfos.Length; i++)
             {
                 PropertyInfo propertyInfo = propertyInfos[i];
-                if (propertyInfo.GetCustomAttribute(ByteBufferAttributeType) is ByteBufferAttribute byteBufferAttribute && byteBufferAttribute.Handle)
+                if (propertyInfo.GetCustomAttribute(ByteBufferAttributeType) is AutoByteBufferAttribute byteBufferAttribute && byteBufferAttribute.Handle)
                 {
                     propertyInfo.SetValue(obj, AutoPop(propertyInfo.PropertyType));
                 }

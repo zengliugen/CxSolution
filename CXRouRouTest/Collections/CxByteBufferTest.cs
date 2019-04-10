@@ -275,13 +275,13 @@ namespace CXRouRouTest.Collections
         }
         struct TestStruct
         {
-            [ByteBuffer(true)]
+            [AutoByteBuffer(true)]
             public int p_int;
-            [ByteBuffer(true)]
+            [AutoByteBuffer(true)]
             public int[] p_ints;
-            [ByteBuffer(true)]
+            [AutoByteBuffer(true)]
             public List<int> p_intList;
-            [ByteBuffer(true)]
+            [AutoByteBuffer(true)]
             public Dictionary<int, int> p_intDictionary;
             public bool EqualsEx(object obj)
             {
@@ -325,15 +325,15 @@ namespace CXRouRouTest.Collections
         }
         class TestClass
         {
-            [ByteBuffer(true)]
+            [AutoByteBuffer(true)]
             public int p_int;
-            [ByteBuffer(true)]
+            [AutoByteBuffer(true)]
             public int[] p_ints;
-            [ByteBuffer(true)]
+            [AutoByteBuffer(true)]
             public List<int> p_intList;
-            [ByteBuffer(true)]
+            [AutoByteBuffer(true)]
             public Dictionary<int, int> p_intDictionary;
-            [ByteBuffer(true)]
+            [AutoByteBuffer(true)]
             public TestStruct p_testStruct;
             public bool EqualsEx(object obj)
             {

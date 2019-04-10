@@ -12,6 +12,8 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
 using System.IO;
 using CxRouRou.Attributes;
+using System.Net.Sockets;
+using System.Net;
 
 namespace CXRouRouTest
 {
@@ -19,10 +21,12 @@ namespace CXRouRouTest
     {
         static void Main(string[] args)
         {
-            CxByteBufferTest byteBufferTest = new CxByteBufferTest("CxByteBufferTest");
-            byteBufferTest.Run();
+            //CxByteBufferTest byteBufferTest = new CxByteBufferTest("CxByteBufferTest");
+            //byteBufferTest.Run();
             //CxNetTest netTest = new CxNetTest("CxNetTest");
             //netTest.Run();
+
+            //CxConsole.WriteLine("%d", 0x4aa210b4);
 
             Console.ReadKey();
         }
