@@ -28,13 +28,13 @@ namespace CxRouRou.Net.Sockets.Tcp
     public abstract class CxNetBase
     {
         /// <summary>
-        /// 主Socket对象
+        /// 主Socket对象(IPv4)
         /// </summary>
-        private Socket _socket;
+        private Socket _socketIPv4;
         /// <summary>
         /// 主Socket对象(IPv6)
         /// </summary>
-        private Socket _socketV6;
+        private Socket _socketIPv6;
         /// <summary>
         /// 会话管理器
         /// </summary>
@@ -56,18 +56,19 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// </summary>
         protected CxNetBase()
         {
-            _netConfig = new CxNetConfig { PoolSize = 1000, ReceiveBufferSize = 8196, ReceiveTimeout = 20000, SendBufferSize = 1400, SendTimeout = 20000, ListenIPv6 = false };
+            _netConfig = new CxNetConfig { MsgFlag = 0x1234, PoolSize = 1000, ReceiveBufferSize = 8196, ReceiveTimeout = 20000, SendBufferSize = 1400, SendTimeout = 20000, ListenIPv6 = false };
         }
         /// <summary>
         /// 设置网络配置
         /// </summary>
+        /// <param name="msgFlag"></param>
         /// <param name="poolSize"></param>
         /// <param name="receiveBufferSize"></param>
         /// <param name="receiveTimeout"></param>
         /// <param name="sendBufferSize"></param>
         /// <param name="sendTimeout"></param>
         /// <param name="listenIPv6"></param>
-        public virtual void SetNetConfig(int poolSize = 1000, int receiveBufferSize = 8196, int receiveTimeout = 20000, int sendBufferSize = 1400, int sendTimeout = 20000, bool listenIPv6 = false)
+        public virtual void SetNetConfig(ushort msgFlag = 0x1234, int poolSize = 1000, int receiveBufferSize = 8196, int receiveTimeout = 20000, int sendBufferSize = 1400, int sendTimeout = 20000, bool listenIPv6 = false)
         {
             if (_isIntFlag != 0)
             {
@@ -102,6 +103,10 @@ namespace CxRouRou.Net.Sockets.Tcp
         {
             Init();
             StartListenAcceptIPv4(port);
+            if (_netConfig.ListenIPv6)
+            {
+                StartListenAcceptIPv6(port);
+            }
         }
         /// <summary>
         /// 开始监听接受连接(IPv4)
@@ -109,31 +114,68 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// <param name="port"></param>
         private void StartListenAcceptIPv4(ushort port)
         {
-            if (_socket != null)
+            if (_socketIPv4 != null)
             {
                 OnStartListenAcceptFail(port, "已经开始监听(IPv4)");
                 return;
             }
-            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            _socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true); //重用地址
+            _socketIPv4 = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            _socketIPv4.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true); //重用地址
 
             SocketAsyncEventArgs socketAsyncEventArgs = PopAcceptSaea();
+            socketAsyncEventArgs.Completed += AcceptCallbackIPv4;
             IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Any, port);
             try
             {
-                _socket.Bind(iPEndPoint);
-                _socket.Listen(int.MaxValue);
-                if (!_socket.AcceptAsync(socketAsyncEventArgs))
+                _socketIPv4.Bind(iPEndPoint);
+                _socketIPv4.Listen(int.MaxValue);
+                if (!_socketIPv4.AcceptAsync(socketAsyncEventArgs))
                 {
-                    AcceptCallbackIPv4(_socket, socketAsyncEventArgs);
+                    AcceptCallbackIPv4(_socketIPv4, socketAsyncEventArgs);
                 }
                 OnStartListenAcceptSuccess(port, "监听成功(IPv4)");
             }
             catch (Exception e)
             {
+                socketAsyncEventArgs.Completed -= AcceptCallbackIPv4;
                 PushAcceptSaea(socketAsyncEventArgs);
                 OnStartListenAcceptFail(port, e.Message);
                 StopAcceptIPv4();
+            }
+        }
+        /// <summary>
+        /// 开始监听接受连接(IPv6)
+        /// </summary>
+        /// <param name="port"></param>
+        private void StartListenAcceptIPv6(ushort port)
+        {
+            if (_socketIPv6 != null)
+            {
+                OnStartListenAcceptFail(port, "已经开始监听(IPv6)");
+                return;
+            }
+            _socketIPv6 = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
+            _socketIPv6.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true); //重用地址
+
+            SocketAsyncEventArgs socketAsyncEventArgs = PopAcceptSaea();
+            socketAsyncEventArgs.Completed += AcceptCallbackIPv6;
+            IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.IPv6Any, port);
+            try
+            {
+                _socketIPv6.Bind(iPEndPoint);
+                _socketIPv6.Listen(int.MaxValue);
+                if (!_socketIPv6.AcceptAsync(socketAsyncEventArgs))
+                {
+                    AcceptCallbackIPv6(_socketIPv6, socketAsyncEventArgs);
+                }
+                OnStartListenAcceptSuccess(port, "监听成功(IPv6)");
+            }
+            catch (Exception e)
+            {
+                socketAsyncEventArgs.Completed -= AcceptCallbackIPv6;
+                PushAcceptSaea(socketAsyncEventArgs);
+                OnStartListenAcceptFail(port, e.Message);
+                StopAcceptIPv6();
             }
         }
         /// <summary>
@@ -146,29 +188,32 @@ namespace CxRouRou.Net.Sockets.Tcp
             if (socketAsyncEventArgs.SocketError == SocketError.Success)
             {
                 CxSession session = _sessionManager.Pop();
-                session.SetSocket(socketAsyncEventArgs.AcceptSocket, _netConfig.SendBufferSize, _netConfig.SendTimeout, _netConfig.ReceiveTimeout);
+                session.SetSocket(socketAsyncEventArgs.AcceptSocket, socketAsyncEventArgs.AcceptSocket.AddressFamily, _netConfig.SendBufferSize, _netConfig.SendTimeout, _netConfig.ReceiveTimeout);
                 OnAcceptSuccess(session.ID, socketAsyncEventArgs.AcceptSocket.RemoteEndPoint.ToString());
                 StartSession(session, null);
                 socketAsyncEventArgs.AcceptSocket = null;
                 try
                 {
-                    if (!_socket.AcceptAsync(socketAsyncEventArgs))
+                    if (!_socketIPv4.AcceptAsync(socketAsyncEventArgs))
                     {
-                        AcceptCallbackIPv4(_socket, socketAsyncEventArgs);
+                        AcceptCallbackIPv4(_socketIPv4, socketAsyncEventArgs);
                     }
                 }
                 catch (ObjectDisposedException)
                 {
                     //主动关闭的
+                    socketAsyncEventArgs.Completed -= AcceptCallbackIPv4;
                     PushAcceptSaea(socketAsyncEventArgs);
                 }
                 catch (NullReferenceException)
                 {
                     //主动关闭的
+                    socketAsyncEventArgs.Completed -= AcceptCallbackIPv4;
                     PushAcceptSaea(socketAsyncEventArgs);
                 }
                 catch (Exception e)
                 {
+                    socketAsyncEventArgs.Completed -= AcceptCallbackIPv4;
                     PushAcceptSaea(socketAsyncEventArgs);
                     OnAcceptFail(e.Message);
                     StopAcceptIPv4();
@@ -178,19 +223,78 @@ namespace CxRouRou.Net.Sockets.Tcp
             if (socketAsyncEventArgs.SocketError == SocketError.OperationAborted)
             {
                 //主动关闭的   
+                socketAsyncEventArgs.Completed -= AcceptCallbackIPv4;
                 PushAcceptSaea(socketAsyncEventArgs);
                 return;
             }
+            socketAsyncEventArgs.Completed -= AcceptCallbackIPv4;
             PushAcceptSaea(socketAsyncEventArgs);
             OnAcceptFail(socketAsyncEventArgs.SocketError.ToString());
             StopAcceptIPv4();
+        }
+        /// <summary>
+        /// 接受连接回调(IPv6)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="socketAsyncEventArgs"></param>
+        private void AcceptCallbackIPv6(object sender, SocketAsyncEventArgs socketAsyncEventArgs)
+        {
+            if (socketAsyncEventArgs.SocketError == SocketError.Success)
+            {
+                CxSession session = _sessionManager.Pop();
+                session.SetSocket(socketAsyncEventArgs.AcceptSocket, socketAsyncEventArgs.AcceptSocket.AddressFamily, _netConfig.SendBufferSize, _netConfig.SendTimeout, _netConfig.ReceiveTimeout);
+                OnAcceptSuccess(session.ID, socketAsyncEventArgs.AcceptSocket.RemoteEndPoint.ToString());
+                StartSession(session, null);
+                socketAsyncEventArgs.AcceptSocket = null;
+                try
+                {
+                    if (!_socketIPv6.AcceptAsync(socketAsyncEventArgs))
+                    {
+                        AcceptCallbackIPv6(_socketIPv6, socketAsyncEventArgs);
+                    }
+                }
+                catch (ObjectDisposedException)
+                {
+                    //主动关闭的
+                    socketAsyncEventArgs.Completed -= AcceptCallbackIPv6;
+                    PushAcceptSaea(socketAsyncEventArgs);
+                }
+                catch (NullReferenceException)
+                {
+                    //主动关闭的
+                    socketAsyncEventArgs.Completed -= AcceptCallbackIPv6;
+                    PushAcceptSaea(socketAsyncEventArgs);
+                }
+                catch (Exception e)
+                {
+                    socketAsyncEventArgs.Completed -= AcceptCallbackIPv6;
+                    PushAcceptSaea(socketAsyncEventArgs);
+                    OnAcceptFail(e.Message);
+                    StopAcceptIPv6();
+                }
+                return;
+            }
+            if (socketAsyncEventArgs.SocketError == SocketError.OperationAborted)
+            {
+                //主动关闭的   
+                socketAsyncEventArgs.Completed -= AcceptCallbackIPv6;
+                PushAcceptSaea(socketAsyncEventArgs);
+                return;
+            }
+            socketAsyncEventArgs.Completed -= AcceptCallbackIPv6;
+            PushAcceptSaea(socketAsyncEventArgs);
+            OnAcceptFail(socketAsyncEventArgs.SocketError.ToString());
+            StopAcceptIPv6();
         }
         /// <summary>
         /// 关闭接受连接
         /// </summary>
         public void StopAccept()
         {
+            if (_isIntFlag == 0) return;
+            OnClose(CxString.Format("!SocketClose OnlineNum:{0}", _sessionManager.OnlineNum));
             StopAcceptIPv4();
+            StopAcceptIPv6();
         }
         /// <summary>
         /// 关闭接受连接(IPv4)
@@ -198,17 +302,43 @@ namespace CxRouRou.Net.Sockets.Tcp
         private void StopAcceptIPv4()
         {
             //关闭接受连接的Socket
-            if (_socket != null)
+            if (_socketIPv4 != null)
             {
-                _socket.Close();
-                _socket = null;
-                OnClose(CxString.Format("!SocketClose(IPv4) OnlineNum:{0}", _sessionManager.OnlineNum));
+                _socketIPv4.Close();
+                _socketIPv4 = null;
                 //关闭所有在线会话(IPv4)
                 ICollection<CxSession> onlines = _sessionManager.GetAllOnline();
                 List<CxSession> removeSessions = new List<CxSession>(onlines.Count);
                 foreach (var session in onlines)
                 {
-                    if (session.Socket != null && session.Socket.AddressFamily == AddressFamily.InterNetwork)
+                    if (session.NetType == AddressFamily.InterNetwork)
+                    {
+                        removeSessions.Add(session);
+                    }
+                }
+                foreach (var session in removeSessions)
+                {
+                    //关闭会话
+                    session.Close();
+                }
+            }
+        }
+        /// <summary>
+        /// 关闭接受连接(IPv6)
+        /// </summary>
+        private void StopAcceptIPv6()
+        {
+            //关闭接受连接的Socket
+            if (_socketIPv6 != null)
+            {
+                _socketIPv6.Close();
+                _socketIPv6 = null;
+                //关闭所有在线会话(IPv6)
+                ICollection<CxSession> onlines = _sessionManager.GetAllOnline();
+                List<CxSession> removeSessions = new List<CxSession>(onlines.Count);
+                foreach (var session in onlines)
+                {
+                    if (session.NetType == AddressFamily.InterNetworkV6)
                     {
                         removeSessions.Add(session);
                     }
@@ -227,31 +357,72 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// </summary>
         /// <param name="host"></param>
         /// <param name="port"></param>
-        public void StartConnect(string host, ushort port)
+        /// <param name="comparer">排序方法</param>
+        public void StartConnect(string host, ushort port, IComparer<IPAddress> comparer = null)
         {
             Init();
-            StartConnectIPv4(host, port);
+            var ipAddressArray = GetIPAddress(host, port, comparer);
+            if (ipAddressArray != null && ipAddressArray.Length > 0)
+            {
+                var ipAddress = ipAddressArray[0];
+                var iPEndPoint = new IPEndPoint(ipAddress, port);
+                StartConnect(iPEndPoint, ipAddress.AddressFamily);
+            }
+            else
+            {
+                OnConnetFail(host, "无法解析的地址");
+            }
         }
         /// <summary>
-        /// 连接(IPv4)
+        /// 获取指定域名或者ip字符串的IP地址信息
         /// </summary>
-        /// <param name="ip"></param>
+        /// <param name="host"></param>
         /// <param name="port"></param>
-        private void StartConnectIPv4(string ip, ushort port)
+        /// <param name="comparer">排序方法</param>
+        /// <returns></returns>
+        private IPAddress[] GetIPAddress(string host, ushort port, IComparer<IPAddress> comparer = null)
         {
-            IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
-            Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            var iPAddressList = new List<IPAddress>();
+            if (CxNetTool.IsIP(host))
+            {
+                IPAddress.TryParse(host, out IPAddress iPAddress);
+                iPAddressList.Add(iPAddress);
+            }
+            else
+            {
+                var hostEntry = Dns.GetHostEntry(host);
+                if (hostEntry != null)
+                {
+                    iPAddressList.AddRange(hostEntry.AddressList);
+                }
+            }
+            if (comparer != null)
+            {
+                iPAddressList.Sort(comparer);
+            }
+            return iPAddressList.ToArray();
+        }
+        /// <summary>
+        /// 连接
+        /// </summary>
+        /// <param name="iPEndPoint"></param>
+        /// <param name="addressFamily"></param>
+        private void StartConnect(IPEndPoint iPEndPoint, AddressFamily addressFamily)
+        {
+            Socket socket = new Socket(addressFamily, SocketType.Stream, ProtocolType.Tcp);
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);//重用地址
             SocketAsyncEventArgs socketAsyncEventArgs = PopConnectSaea();
+            socketAsyncEventArgs.Completed += ConnectCallback;
             socketAsyncEventArgs.RemoteEndPoint = iPEndPoint;
             try
             {
                 if (!socket.ConnectAsync(socketAsyncEventArgs))
-                    ConnectCallbackIPv4(socket, socketAsyncEventArgs);
+                    ConnectCallback(socket, socketAsyncEventArgs);
             }
             catch (Exception e)
             {
                 socket.Close();
+                socketAsyncEventArgs.Completed -= ConnectCallback;
                 PushConnectSaea(socketAsyncEventArgs);
                 OnConnetFail(iPEndPoint.ToString(), e.Message);
             }
@@ -261,19 +432,20 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="socketAsyncEventArgs"></param>
-        private void ConnectCallbackIPv4(object sender, SocketAsyncEventArgs socketAsyncEventArgs)
+        private void ConnectCallback(object sender, SocketAsyncEventArgs socketAsyncEventArgs)
         {
             Socket socket = (Socket)sender;
             EndPoint endPoint = socketAsyncEventArgs.RemoteEndPoint;
             if (socketAsyncEventArgs.SocketError == SocketError.Success)
             {
                 var session = _sessionManager.Pop();
-                session.SetSocket(socket, _netConfig.SendBufferSize, _netConfig.SendTimeout, _netConfig.ReceiveTimeout);
+                session.SetSocket(socket, socket.AddressFamily, _netConfig.SendBufferSize, _netConfig.SendTimeout, _netConfig.ReceiveTimeout);
                 OnConnetSuccess(session.ID, endPoint.ToString());
                 StartSession(session, null);
                 return;
             }
             socket.Close();
+            socketAsyncEventArgs.Completed -= ConnectCallback;
             PushConnectSaea(socketAsyncEventArgs);
             OnConnetFail(endPoint.ToString(), socketAsyncEventArgs.SocketError.ToString());
         }
@@ -282,23 +454,14 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// </summary>
         public void StopConnect()
         {
-            StopConnectIPv4();
-        }
-        /// <summary>
-        /// 停止连接(IPv4)
-        /// </summary>
-        private void StopConnectIPv4()
-        {
-            OnClose(CxString.Format("!SocketClose(IPv4) OnlineNum:{0}", _sessionManager.OnlineNum));
-            //关闭所有在线会话(IPv4)
+            if (_isIntFlag == 0) return;
+            OnClose(CxString.Format("!SocketClose OnlineNum:{0}", _sessionManager.OnlineNum));
+            //关闭所有在线会话
             ICollection<CxSession> onlines = _sessionManager.GetAllOnline();
             List<CxSession> removeSessions = new List<CxSession>(onlines.Count);
             foreach (var session in onlines)
             {
-                if (session.Socket != null && session.Socket.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    removeSessions.Add(session);
-                }
+                removeSessions.Add(session);
             }
             foreach (var session in removeSessions)
             {
@@ -318,6 +481,7 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// <param name="useAsync"></param>
         public void Send(uint id, byte[] buffer, int index, int length, bool useAsync)
         {
+            if (_isIntFlag == 0) return;
             CxSession session = _sessionManager.GetOnline(id);
             if (session != null)
             {
@@ -384,7 +548,6 @@ namespace CxRouRou.Net.Sockets.Tcp
         private SocketAsyncEventArgs PopAcceptSaea()
         {
             SocketAsyncEventArgs socketAsyncEventArgs = _saeaPool.Pop();
-            socketAsyncEventArgs.Completed += AcceptCallbackIPv4;
             return socketAsyncEventArgs;
         }
         /// <summary>
@@ -397,7 +560,6 @@ namespace CxRouRou.Net.Sockets.Tcp
             {
                 return;
             }
-            socketAsyncEventArgs.Completed -= AcceptCallbackIPv4;
             _saeaPool.Push(socketAsyncEventArgs);
         }
         /// <summary>
@@ -430,7 +592,6 @@ namespace CxRouRou.Net.Sockets.Tcp
         private SocketAsyncEventArgs PopConnectSaea()
         {
             var socketAsyncEventArgs = _saeaPool.Pop();
-            socketAsyncEventArgs.Completed += ConnectCallbackIPv4;
             return socketAsyncEventArgs;
         }
         /// <summary>
@@ -439,7 +600,6 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// <param name="socketAsyncEventArgs"></param>
         private void PushConnectSaea(SocketAsyncEventArgs socketAsyncEventArgs)
         {
-            socketAsyncEventArgs.Completed -= ConnectCallbackIPv4;
             _saeaPool.Push(socketAsyncEventArgs);
         }
         #endregion
@@ -490,6 +650,7 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// <param name="id"></param>
         public void Close(uint id)
         {
+            if (_isIntFlag == 0) return;
             CxSession session = _sessionManager.GetOnline(id);
             if (session != null)
             {
@@ -501,6 +662,7 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// </summary>
         public void CloseAll()
         {
+            if (_isIntFlag == 0) return;
             ICollection<CxSession> onlines = _sessionManager.GetAllOnline();
             List<CxSession> removeSessions = new List<CxSession>(onlines.Count);
             foreach (var session in onlines)
@@ -531,6 +693,7 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// <param name="error"></param>
         protected virtual void OnStartListenAcceptFail(ushort port, string error)
         {
+            CxDebug.WriteLine("Socket OnStartListenAcceptFail port:{0} error:{1}", port, error);
         }
         /// <summary>
         /// 当启动成功时
@@ -539,6 +702,7 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// <param name="message"></param>
         protected virtual void OnStartListenAcceptSuccess(ushort port, string message)
         {
+            CxDebug.WriteLine("Socket OnStartListenAcceptSuccess port:{0} message:{1}", port, message);
         }
         /// <summary>
         /// 当接受连接失败
@@ -546,7 +710,7 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// <param name="message"></param>
         protected virtual void OnAcceptFail(string message)
         {
-
+            CxDebug.WriteLine("Socket OnAcceptFail message:{0}", message);
         }
         /// <summary>
         /// 当接受到连接时
@@ -555,6 +719,7 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// <param name="address"></param>
         protected virtual void OnAcceptSuccess(uint id, string address)
         {
+            CxDebug.WriteLine("Socket OnAcceptSuccess id:{0} address:{1}", id, address);
         }
         /// <summary>
         /// 当连接成功时
@@ -563,7 +728,7 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// <param name="address"></param>
         protected virtual void OnConnetSuccess(uint id, string address)
         {
-
+            CxDebug.WriteLine("Socket OnConnetSuccess id:{0} address:{1}", id, address);
         }
         /// <summary>
         /// 当连接失败时
@@ -572,7 +737,7 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// <param name="error"></param>
         protected virtual void OnConnetFail(string address, string error)
         {
-
+            CxDebug.WriteLine("Socket OnConnetFail address:{0} CloseType:{1}", address, error);
         }
         /// <summary>
         /// 当连接断开时
@@ -582,6 +747,7 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// <param name="message"></param>
         protected virtual void OnLossConnection(uint id, CloseType closeType, string message)
         {
+            CxDebug.WriteLine("Socket OnLossConnection id:{0} closeType:{1} message:{2}", id, closeType, message);
         }
         /// <summary>
         /// 当收到数据时
@@ -598,7 +764,7 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// <param name="error"></param>
         protected virtual void OnClose(string error)
         {
-
+            CxDebug.WriteLine("Socket OnClose error:{0}", error);
         }
         #endregion
     }

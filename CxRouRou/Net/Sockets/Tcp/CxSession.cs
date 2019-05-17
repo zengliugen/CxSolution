@@ -7,6 +7,24 @@ using CxRouRou.Collections;
 namespace CxRouRou.Net.Sockets.Tcp
 {
     /// <summary>
+    /// 会话网络类型枚举
+    /// </summary>
+    public enum ECxSessionNetType
+    {
+        /// <summary>
+        /// 默认
+        /// </summary>
+        None,
+        /// <summary>
+        /// 
+        /// </summary>
+        IPv4,
+        /// <summary>
+        /// 
+        /// </summary>
+        IPv6,
+    }
+    /// <summary>
     /// 会话
     /// </summary>
     public class CxSession : IReceiveData
@@ -15,6 +33,10 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// 会话ID
         /// </summary>
         public uint ID { get; internal set; }
+        /// <summary>
+        /// 会话网络类型
+        /// </summary>
+        public AddressFamily NetType { get; private set; }
         /// <summary>
         /// 数据缓冲区
         /// </summary>
@@ -65,10 +87,11 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// 设置Socket
         /// </summary>
         /// <param name="socket"></param>
+        /// <param name="netType"></param>
         /// <param name="sendBufferSize"></param>
         /// <param name="sendTimeout"></param>
         /// <param name="receiveTimeout"></param>
-        internal void SetSocket(Socket socket, int sendBufferSize, int sendTimeout, int receiveTimeout)
+        internal void SetSocket(Socket socket, AddressFamily netType, int sendBufferSize, int sendTimeout, int receiveTimeout)
         {
             Socket = socket;
             Socket.SendBufferSize = sendBufferSize;
@@ -77,6 +100,8 @@ namespace CxRouRou.Net.Sockets.Tcp
             Socket.NoDelay = !false;// 不使用nagle算法延迟(将收到发送请求就立即发送数据)  对udp无效
             Socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, true);
             Socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+
+            NetType = netType;
 
             _sendSaea = _saeaPool.Pop();
             _sendSaea.Completed += SendCallBack;
@@ -159,8 +184,12 @@ namespace CxRouRou.Net.Sockets.Tcp
                 _sendSaea = null;
             }
             tempSendSaea.Completed -= SendCallBack;
-            tempSendSaea.BufferList.Clear();
-            tempSendSaea.BufferList = null;
+            //此时可能还未发送过消息，BufferList未空
+            if (tempSendSaea.BufferList != null)
+            {
+                tempSendSaea.BufferList.Clear();
+                tempSendSaea.BufferList = null;
+            }
             _saeaPool.Push(tempSendSaea);
         }
         /// <summary>
@@ -191,6 +220,7 @@ namespace CxRouRou.Net.Sockets.Tcp
                     Socket.Shutdown(SocketShutdown.Both);
                     Socket.Close();
                     Socket = null;
+                    NetType = AddressFamily.Unknown;
                 }
             }
             PushSendSaea(); //从来没有调用过发送的时候  可以在这里回收

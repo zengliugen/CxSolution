@@ -35,38 +35,42 @@ namespace CxRouRouTest.Net.Sockets.Tcp
         public override bool Test()
         {
             ushort port = 12345;
-            string ip = "192.168.2.236";
-
+            string ip = "zeng.com";
+            ip = "127.0.0.1";
             bool result = false;
             bool isCheckOver = false;
             TestNet net = new TestNet();
+            net.SetNetConfig();
+            bool isConnect = false;
             net.StartListenAcceptOkAction = () =>
             {
+                if (isConnect) return;
                 Thread.Sleep(1000);
                 net.StartConnect(ip, port);
+                isConnect = true;
             };
             net.CheckMsgLength = 5;
             net.ConnectOkAction = () =>
             {
                 Thread.Sleep(1000);
                 CxMsgPacket msgPacket = new CxMsgPacket(1400);
-                msgPacket.Push(CxArray.CreateRandomByte(1400 - CxMsgPacket.FreeNum - 2));
+                msgPacket.Push(CxArray.CreateRandomByte(1400 - CxMsgPacket.GetFreeNum() - 2));
                 net.SendMsg(msgPacket);
                 Thread.Sleep(1000);
                 msgPacket = new CxMsgPacket(1400);
-                msgPacket.Push(CxArray.CreateRandomByte(1400 - CxMsgPacket.FreeNum - 2));
+                msgPacket.Push(CxArray.CreateRandomByte(1400 - CxMsgPacket.GetFreeNum() - 2));
                 net.SendMsg(msgPacket);
                 Thread.Sleep(1000);
                 msgPacket = new CxMsgPacket(1400);
-                msgPacket.Push(CxArray.CreateRandomByte(1400 - CxMsgPacket.FreeNum - 2));
+                msgPacket.Push(CxArray.CreateRandomByte(1400 - CxMsgPacket.GetFreeNum() - 2));
                 net.SendMsg(msgPacket);
                 Thread.Sleep(1000);
                 msgPacket = new CxMsgPacket(1400);
-                msgPacket.Push(CxArray.CreateRandomByte(1400 - CxMsgPacket.FreeNum - 2));
+                msgPacket.Push(CxArray.CreateRandomByte(1400 - CxMsgPacket.GetFreeNum() - 2));
                 net.SendMsg(msgPacket);
                 Thread.Sleep(1000);
                 msgPacket = new CxMsgPacket(1400);
-                msgPacket.Push(CxArray.CreateRandomByte(1400 - CxMsgPacket.FreeNum - 2));
+                msgPacket.Push(CxArray.CreateRandomByte(1400 - CxMsgPacket.GetFreeNum() - 2));
                 net.SendMsg(msgPacket);
             };
             net.ErrorAction = (error) =>
@@ -116,9 +120,9 @@ namespace CxRouRouTest.Net.Sockets.Tcp
             public Action<string> MsgAction;
             public TestNet()
             {
-                AddMsgHandler(1, (id, msgPacket) =>
+                AddMsgHandler(1, (id, cmd, msgPacket) =>
                 {
-                    MsgAction.Invoke("收到消息包");
+                    MsgAction.Invoke("收到消息包" + msgPacket.Length);
                     ReceiveMsgs.Add(msgPacket);
                     if (ReceiveMsgs.Count >= CheckMsgLength)
                     {
@@ -144,7 +148,7 @@ namespace CxRouRouTest.Net.Sockets.Tcp
             }
             public void SendMsg(CxMsgPacket msgPacket)
             {
-                MsgAction.Invoke("发送消息包");
+                MsgAction.Invoke("发送消息包" + msgPacket.Length);
                 SendMsgPacket(ConnectID, 1, msgPacket);
                 SendMsgs.Add(msgPacket);
             }

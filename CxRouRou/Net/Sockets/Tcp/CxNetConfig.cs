@@ -10,6 +10,10 @@ namespace CxRouRou.Net.Sockets.Tcp
     public sealed class CxNetConfig
     {
         /// <summary>
+        /// 消息标志 默认 0x1234
+        /// </summary>
+        public ushort MsgFlag { get; set; }
+        /// <summary>
         /// 会话对象池大小 默认1000
         /// </summary>
         public int PoolSize { get; set; }

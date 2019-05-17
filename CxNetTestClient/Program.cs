@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Net;
 using System.Threading;
 using CxRouRou.Collections;
 using CxRouRou.Net.Sockets.Tcp;
@@ -8,6 +10,21 @@ namespace CxNetTestClient
 {
     class Program
     {
+        public class IPAddressComparer : IComparer<IPAddress>
+        {
+            public int Compare(IPAddress x, IPAddress y)
+            {
+                if (x.AddressFamily == y.AddressFamily)
+                {
+                    return -1;
+                }
+                else if (x.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
+                {
+                    return 1;
+                }
+                return -1;
+            }
+        }
         static void Main(string[] args)
         {
             ClientNet net = new ClientNet();
@@ -21,7 +38,7 @@ namespace CxNetTestClient
                     case "connect":
                         for (int i = 0; i < int.Parse(cmds.Length < 2 ? "1" : cmds[1]); i++)
                         {
-                            net.StartConnect("127.0.0.1", 12345);
+                            net.StartConnect("zeng.com", 12345);
                             Thread.Sleep(1);
                         }
                         break;
@@ -35,6 +52,7 @@ namespace CxNetTestClient
                         CxConsole.WriteLine(net.OnlineNum);
                         break;
                     case "exit":
+                        net.Dispose();
                         return;
                     default:
                         break;
@@ -62,8 +80,8 @@ namespace CxNetTestClient
             }
             protected override void OnReceiveData(IReceiveData receiveData, int length)
             {
-                CxConsole.WriteLine("收到服务器消息 data:{0}", receiveData.Buffer.GetArray(0, length).ToStringEx());
                 base.OnReceiveData(receiveData, length);
+                CxConsole.WriteLine("收到服务器消息 data:{0}", receiveData.Buffer.GetArray(0, length).ToStringEx());
             }
             protected override void OnLossConnection(uint id, CloseType closeType, string message)
             {

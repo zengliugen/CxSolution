@@ -14,6 +14,7 @@ namespace CxNetTestServer
         static void Main(string[] args)
         {
             ServerNet net = new ServerNet();
+            net.SetNetConfig(listenIPv6: true);
             while (true)
             {
                 CxConsole.WriteLine("请输入指令");
@@ -41,6 +42,7 @@ namespace CxNetTestServer
                         CxConsole.WriteLine(net.OnlineNum);
                         break;
                     case "exit":
+                        net.Dispose();
                         return;
                     default:
                         break;

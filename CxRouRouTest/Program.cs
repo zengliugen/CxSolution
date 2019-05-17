@@ -23,8 +23,8 @@ namespace CXRouRouTest
         {
             //CxByteBufferTest byteBufferTest = new CxByteBufferTest("CxByteBufferTest");
             //byteBufferTest.Run();
-            //CxNetTest netTest = new CxNetTest("CxNetTest");
-            //netTest.Run();
+            CxNetTest netTest = new CxNetTest("CxNetTest");
+            netTest.Run();
 
             //CxConsole.WriteLine("%d", 0x4aa210b4);
 

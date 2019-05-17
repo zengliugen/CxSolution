@@ -5,7 +5,7 @@ using System.Diagnostics;
 namespace CxRouRou.Util
 {
     /// <summary>
-    /// 调试日志
+    /// 调试操作
     /// </summary>
     public static class CxDebug
     {

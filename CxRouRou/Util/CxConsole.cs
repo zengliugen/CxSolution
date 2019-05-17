@@ -5,7 +5,7 @@ using System.Text;
 namespace CxRouRou.Util
 {
     /// <summary>
-    /// 控制台控制
+    /// 控制台操作
     /// </summary>
     public static class CxConsole
     {

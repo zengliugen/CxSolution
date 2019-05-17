@@ -9,7 +9,6 @@ namespace CxRouRou.Util
     /// </summary>
     public class CxTrace
     {
-
         /// <summary>
         /// 输出
         /// </summary>

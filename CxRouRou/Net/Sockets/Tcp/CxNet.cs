@@ -1,7 +1,4 @@
-﻿//是否使用uint作为长度
-#define CX_MSGPACKET_USE_UINT_LENGTH
-#undef CX_MSGPACKET_USE_UINT_LENGTH
-using CxRouRou.Collections;
+﻿using CxRouRou.Collections;
 using CxRouRou.Util;
 using System;
 using System.Collections.Generic;
@@ -31,7 +28,7 @@ namespace CxRouRou.Net.Sockets.Tcp
             /// <summary>
             /// 未注册的指令
             /// </summary>
-            CmdNotRegion = 1002,
+            CmdNotRegion = 2001,
             /// <summary>
             /// 接收数据长度错误
             /// </summary>
@@ -41,11 +38,6 @@ namespace CxRouRou.Net.Sockets.Tcp
             /// </summary>
             CmdHandlerError = 7001,
         }
-
-        /// <summary>
-        /// 消息标志
-        /// </summary>
-        public const ushort MsgFlag = 0x0328;
         /// <summary>
         /// 发送消息队列数据
         /// </summary>
@@ -55,9 +47,9 @@ namespace CxRouRou.Net.Sockets.Tcp
             public byte[] Data;
         }
         /// <summary>
-        /// 消息派发方法
+        /// 消息派发方法 [指令 [连接ID 指令 消息内容]]
         /// </summary>
-        private readonly Dictionary<ushort, Action<uint, CxMsgPacket>> _msgHandler;
+        private readonly Dictionary<ushort, Action<uint, ushort, CxMsgPacket>> _msgHandler;
         /// <summary>
         /// 派发消息队列
         /// </summary>
@@ -77,7 +69,8 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// <param name="useDispacthMsgQueue"></param>
         public CxNet(int msgHandlerSize = 512, bool useDispacthMsgQueue = true)
         {
-            _msgHandler = new Dictionary<ushort, Action<uint, CxMsgPacket>>(msgHandlerSize);
+            CxDebug.WriteLine("当前最大支持消息包长度为:{0}", CxMsgPacket.MaxLength);
+            _msgHandler = new Dictionary<ushort, Action<uint, ushort, CxMsgPacket>>(msgHandlerSize);
             _useDispacthMsgQueue = useDispacthMsgQueue;
             if (useDispacthMsgQueue)
             {
@@ -104,50 +97,37 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// <summary>
         /// 设置网络配置
         /// </summary>
+        /// <param name="msgFlag"></param>
         /// <param name="poolSize"></param>
         /// <param name="receiveBufferSize"></param>
         /// <param name="receiveTimeout"></param>
         /// <param name="sendBufferSize"></param>
         /// <param name="sendTimeout"></param>
         /// <param name="listenIPv6"></param>
-        public override void SetNetConfig(int poolSize = 1000, int receiveBufferSize = 8196, int receiveTimeout = 20000, int sendBufferSize = 1400, int sendTimeout = 20000, bool listenIPv6 = false)
+        public override void SetNetConfig(ushort msgFlag = 0x1234, int poolSize = 1000, int receiveBufferSize = 8196, int receiveTimeout = 20000, int sendBufferSize = 1400, int sendTimeout = 20000, bool listenIPv6 = false)
         {
 #if DEBUG
             //检测参数是否错误
-#if CX_MSGPACKET_USE_UINT_LENGTH
-            if (receiveBufferSize > int.MaxValue || sendBufferSize > int.MaxValue)
+            if (receiveBufferSize > CxMsgPacket.MaxLength || sendBufferSize > CxMsgPacket.MaxLength)
             {
-                if (receiveBufferSize > int.MaxValue)
+                if (receiveBufferSize > CxMsgPacket.MaxLength)
                 {
-                    throw new ArgumentOutOfRangeException("receiveBufferSize", CxString.Format("发送缓冲区太大 CurSize:{0} MaxSize:{1}", receiveBufferSize, int.MaxValue));
+                    CxDebug.WriteLine(CxString.Format("接收缓冲区大于了消息包最大长度，造成了内存浪费 CurSize:{0} CxMsgPacket.MaxLength:{1}", receiveBufferSize, CxMsgPacket.MaxLength));
                 }
-                else
+                if (sendBufferSize > CxMsgPacket.MaxLength)
                 {
-                    throw new ArgumentOutOfRangeException("sendBufferSize", CxString.Format("接收缓冲区太大 CurSize:{0} MaxSize:{1}", sendBufferSize, int.MaxValue));
-                }
-            }
-#else
-            if (receiveBufferSize > ushort.MaxValue || sendBufferSize > ushort.MaxValue)
-            {
-                if (receiveBufferSize > ushort.MaxValue)
-                {
-                    throw new ArgumentOutOfRangeException("receiveBufferSize", CxString.Format("发送缓冲区太大 CurSize:{0} MaxSize:{1}", receiveBufferSize, ushort.MaxValue));
-                }
-                else
-                {
-                    throw new ArgumentOutOfRangeException("sendBufferSize", CxString.Format("接收缓冲区太大 CurSize:{0} MaxSize:{1}", sendBufferSize, ushort.MaxValue));
+                    CxDebug.WriteLine(CxString.Format("发送缓冲区大于了消息包最大长度，造成了内存浪费 CurSize:{0} CxMsgPacket.MaxLength:{1}", receiveBufferSize, CxMsgPacket.MaxLength));
                 }
             }
 #endif
-#endif
-            base.SetNetConfig(poolSize, receiveBufferSize, receiveTimeout, sendBufferSize, sendTimeout, listenIPv6);
+            base.SetNetConfig(msgFlag, poolSize, receiveBufferSize, receiveTimeout, sendBufferSize, sendTimeout, listenIPv6);
         }
         /// <summary>
         /// 添加指令处理函数
         /// </summary>
         /// <param name="cmd"></param>
         /// <param name="handler"></param>
-        public void AddMsgHandler(ushort cmd, Action<uint, CxMsgPacket> handler)
+        public void AddMsgHandler(ushort cmd, Action<uint, ushort, CxMsgPacket> handler)
         {
             _msgHandler[cmd] = handler ?? throw new ArgumentNullException("handler");
         }
@@ -159,11 +139,11 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// <param name="msgPacket"></param>
         private void Dispatch(uint id, ushort cmd, CxMsgPacket msgPacket)
         {
-            if (_msgHandler.TryGetValue(cmd, out Action<uint, CxMsgPacket> handler))
+            if (_msgHandler.TryGetValue(cmd, out Action<uint, ushort, CxMsgPacket> handler))
             {
                 try
                 {
-                    handler.Invoke(id, msgPacket);
+                    handler.Invoke(id, cmd, msgPacket);
                 }
                 catch (Exception e)
                 {
@@ -186,7 +166,7 @@ namespace CxRouRou.Net.Sockets.Tcp
             CxMsgPacket msgPacket = new CxMsgPacket(data) { ReadPos = CxMsgPacket.LengthSize };//从CxMsgPacket.LengthSize开始读取
             ushort msgFlag = msgPacket.Pop_ushort();
             ushort cmd = msgPacket.Pop_ushort();
-            if (msgFlag == MsgFlag)
+            if (msgFlag == _netConfig.MsgFlag)
             {
                 if (BeforeDispacth(id, cmd))
                 {
@@ -206,20 +186,12 @@ namespace CxRouRou.Net.Sockets.Tcp
         protected override void OnReceiveData(IReceiveData receiveData, int length)
         {
             //预留字节CxMsgPacket.FreeNum包含(CxMsgPacket.LengthSize字节长度 CxMsgPacket.FlagSize字节标志)CxMsgPacket.CmdSize字节指令
-#if CX_MSGPACKET_USE_UINT_LENGTH
             int packageLength = 0;
-#else
-            ushort packageLength = 0;
-#endif
             CxMsgPacket msgPacket = new CxMsgPacket(receiveData.Buffer);
             if (length >= CxMsgPacket.LengthSize)//需要CxMsgPacket.LengthSize字节才可解出包长
             {
                 //获取包长
-#if CX_MSGPACKET_USE_UINT_LENGTH
-                packageLength = (int)msgPacket.Pop_uint();
-#else
-                packageLength = msgPacket.Pop_ushort();
-#endif
+                packageLength = msgPacket.PopMsgPackageLength();
                 while (packageLength >= CxMsgPacket.FreeNum - CxMsgPacket.LengthSize &&//最小包长度 至少需(CxMsgPacket.FreeNum - CxMsgPacket.LengthSize)字节
                         packageLength <= _netConfig.ReceiveBufferSize &&//小于接收缓冲区大小
                         packageLength <= (length - msgPacket.ReadPos))//小于剩余数据长度，否则可能断包，需要粘包处理
@@ -243,11 +215,7 @@ namespace CxRouRou.Net.Sockets.Tcp
                     msgPacket.ReadPos += packageLength;
                     if (msgPacket.ReadPos + CxMsgPacket.LengthSize <= length)//还能解出一个包头
                     {
-#if CX_MSGPACKET_USE_UINT_LENGTH
-                        packageLength = (int)msgPacket.Pop_uint();
-#else
-                        packageLength = msgPacket.Pop_ushort();
-#endif
+                        packageLength = msgPacket.PopMsgPackageLength();
                     }
                     else//不能解出一个包头
                     {
@@ -289,11 +257,15 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// <param name="useAsync"></param>
         public void SendMsgPacket(uint id, ushort cmd, CxMsgPacket msgPacket, bool useAsync = true)
         {
+            if (msgPacket.Length > CxMsgPacket.MaxLength)
+            {
+                throw new ArgumentOutOfRangeException("msgPacket", CxString.Format("发送数据过长 超过了CxMsgPacket.MaxLength设置的大小 msgPacket.Length:{0} CxMsgPacket.MaxLength:{1}", msgPacket.Length, _netConfig.SendBufferSize));
+            }
             if (msgPacket.Length > _netConfig.SendBufferSize)
             {
                 throw new ArgumentOutOfRangeException("msgPacket", CxString.Format("发送数据过长 超过了SendBufferSize设置的大小 msgPacket.Length:{0} SendBufferSize:{1}", msgPacket.Length, _netConfig.SendBufferSize));
             }
-            msgPacket.Package(MsgFlag, cmd);
+            msgPacket.Package(_netConfig.MsgFlag, cmd);
             BeforeSend(id, msgPacket.Data, CxMsgPacket.LengthSize, msgPacket.Length - CxMsgPacket.LengthSize);
             Send(id, msgPacket.Data, 0, msgPacket.Length, useAsync);
         }

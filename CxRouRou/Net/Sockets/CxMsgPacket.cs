@@ -1,37 +1,43 @@
-﻿//是否使用uint作为长度
-#define CX_MSGPACKET_USE_UINT_LENGTH
-#undef CX_MSGPACKET_USE_UINT_LENGTH
+﻿//MSG_PACKAGE_SUPPORT_INT_MAX_LENGTH
+//支持int做为最大长度
+
 using CxRouRou.Collections;
-using System;
-using System.Collections.Generic;
-using System.Text;
 namespace CxRouRou.Net.Sockets
 {
     /// <summary>
     /// 消息包
+    /// 默认最大包长度 ushort.MaxValue 65535
+    /// 默认最大数据长度(最大包长减去sizeof(ushort)) 65533
+    /// 支持使用int 需调用 SupportIntMaxLength
+    /// 支持最大包长度 int.MaxValue 2147483647
+    /// 支持最大数据长度(最大包长减去sizeof(int)) 2147483643
     /// </summary>
     public sealed class CxMsgPacket : CxByteBuffer
     {
         /// <summary>
+        /// 是否使用int作为最大长度
+        /// </summary>
+        internal static bool UseIntMaxLength = false;
+        /// <summary>
+        /// 最大长度
+        /// </summary>
+        internal static int MaxLength = ushort.MaxValue;
+        /// <summary>
         /// 长度大小
         /// </summary>
-#if CX_MSGPACKET_USE_UINT_LENGTH
-        public const int LengthSize = sizeof(uint);
-#else
-        public const int LengthSize = sizeof(ushort);
-#endif
+        internal static int LengthSize = sizeof(ushort);
         /// <summary>
         /// 标志大小
         /// </summary>
-        public const int FlagSize = sizeof(ushort);
+        internal const int FlagSize = sizeof(ushort);
         /// <summary>
         /// 指令大小
         /// </summary>
-        public const int CmdSize = sizeof(ushort);
+        internal const int CmdSize = sizeof(ushort);
         /// <summary>
         /// 预留字节 LengthSize字节长度 FlagSize字节标志 CmdSize字节指令
         /// </summary>
-        public const int FreeNum = LengthSize + FlagSize + CmdSize;
+        internal static int FreeNum = LengthSize + FlagSize + CmdSize;
         /// <summary>
         /// 初始化
         /// </summary>
@@ -90,16 +96,70 @@ namespace CxRouRou.Net.Sockets
             int length = Length;
             WritePos = 0;
             //写入长度(不包长度自身所占字节)
-#if CX_MSGPACKET_USE_UINT_LENGTH
-            Push_uint(length - LengthSize);
-#else
-            Push_ushort(length - LengthSize);
-#endif
+            PushMsgPackageLength(length - LengthSize);
             //写入标记
             Push_ushort(flag);
             //写入指令
             Push_ushort(cmd);
             WritePos = length;
+        }
+        /// <summary>
+        /// 写入消息包长度
+        /// </summary>
+        /// <param name="length"></param>
+        internal void PushMsgPackageLength(int length)
+        {
+#if MSG_PACKAGE_SUPPORT_INT_MAX_LENGTH
+            if (UseIntMaxLength)
+            {
+                Push_int(length);
+            }
+            else
+            {
+                Push_ushort(length);
+            }
+#else
+            Push_ushort(length);
+#endif
+        }
+        /// <summary>
+        /// 读取消息包长度
+        /// </summary>
+        /// <returns></returns>
+        internal int PopMsgPackageLength()
+        {
+#if MSG_PACKAGE_SUPPORT_INT_MAX_LENGTH
+            if (UseIntMaxLength)
+            {
+                return Pop_int();
+            }
+            else
+            {
+                return Pop_ushort();
+            }
+#else
+            return Pop_ushort();
+#endif
+        }
+#if MSG_PACKAGE_SUPPORT_INT_MAX_LENGTH
+        /// <summary>
+        /// 支持int作为最大长度
+        /// </summary>
+        public static void SupportIntMaxLength()
+        {
+            MaxLength = int.MaxValue;
+            LengthSize = sizeof(int);
+            FreeNum = LengthSize + FlagSize + CmdSize;
+            UseIntMaxLength = true;
+        }
+#endif
+        /// <summary>
+        /// 获取预留字节 LengthSize字节长度 FlagSize字节标志 CmdSize字节指令
+        /// </summary>
+        /// <returns></returns>
+        public static int GetFreeNum()
+        {
+            return FreeNum;
         }
     }
 }
