@@ -32,10 +32,10 @@ namespace CxRouRou.Util
         /// 输出
         /// </summary>
         /// <param name="format"></param>
-        /// <param name="arg"></param>
-        public static void Write(string format, params object[] arg)
+        /// <param name="args"></param>
+        public static void Write(string format, params object[] args)
         {
-            string value = CxString.Format(format, arg);
+            string value = CxString.Format(format, args);
             if (WriteTime)
             {
                 Console.Write(CxString.Format("[{0}] {1}", CxTime.GetDateTime(), value));
@@ -65,10 +65,10 @@ namespace CxRouRou.Util
         /// 输出行
         /// </summary>
         /// <param name="format"></param>
-        /// <param name="arg"></param>
-        public static void WriteLine(string format, params object[] arg)
+        /// <param name="args"></param>
+        public static void WriteLine(string format, params object[] args)
         {
-            string value = CxString.Format(format, arg); if (WriteTime)
+            string value = CxString.Format(format, args); if (WriteTime)
             {
                 Console.WriteLine(CxString.Format("[{0}] {1}", CxTime.GetDateTime(), value));
             }

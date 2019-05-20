@@ -22,11 +22,11 @@ namespace CxRouRou.Util
         /// 输出
         /// </summary>
         /// <param name="format"></param>
-        /// <param name="arg"></param>
+        /// <param name="args"></param>
         [Conditional("TRACE")]
-        public static void Write(string format, params object[] arg)
+        public static void Write(string format, params object[] args)
         {
-            string value = CxString.Format(format, arg);
+            string value = CxString.Format(format, args);
             Trace.Write(CxString.Format("[{0}] {1}", CxTime.GetDateTime(), value));
         }
         /// <summary>
@@ -42,11 +42,11 @@ namespace CxRouRou.Util
         /// 输出行
         /// </summary>
         /// <param name="format"></param>
-        /// <param name="arg"></param>
+        /// <param name="args"></param>
         [Conditional("TRACE")]
-        public static void WriteLine(string format, params object[] arg)
+        public static void WriteLine(string format, params object[] args)
         {
-            string value = CxString.Format(format, arg);
+            string value = CxString.Format(format, args);
             Trace.WriteLine(CxString.Format("[{0}] {1}", CxTime.GetDateTime(), value));
         }
     }

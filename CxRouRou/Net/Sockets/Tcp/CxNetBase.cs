@@ -56,19 +56,18 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// </summary>
         protected CxNetBase()
         {
-            _netConfig = new CxNetConfig { MsgFlag = 0x1234, PoolSize = 1000, ReceiveBufferSize = 8196, ReceiveTimeout = 20000, SendBufferSize = 1400, SendTimeout = 20000, ListenIPv6 = false };
+            _netConfig = new CxNetConfig { PoolSize = 1000, ReceiveBufferSize = 8196, ReceiveTimeout = 20000, SendBufferSize = 1400, SendTimeout = 20000, ListenIPv6 = false };
         }
         /// <summary>
         /// 设置网络配置
         /// </summary>
-        /// <param name="msgFlag"></param>
         /// <param name="poolSize"></param>
         /// <param name="receiveBufferSize"></param>
         /// <param name="receiveTimeout"></param>
         /// <param name="sendBufferSize"></param>
         /// <param name="sendTimeout"></param>
         /// <param name="listenIPv6"></param>
-        public virtual void SetNetConfig(ushort msgFlag = 0x1234, int poolSize = 1000, int receiveBufferSize = 8196, int receiveTimeout = 20000, int sendBufferSize = 1400, int sendTimeout = 20000, bool listenIPv6 = false)
+        public virtual void SetNetConfig(int poolSize = 1000, int receiveBufferSize = 8196, int receiveTimeout = 20000, int sendBufferSize = 1400, int sendTimeout = 20000, bool listenIPv6 = false)
         {
             if (_isIntFlag != 0)
             {

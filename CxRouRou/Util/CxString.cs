@@ -13,17 +13,17 @@ namespace CxRouRou.Util
         /// 格式化
         /// </summary>
         /// <param name="format"></param>
-        /// <param name="arg"></param>
+        /// <param name="args"></param>
         /// <returns></returns>
-        public static string Format(string format, params object[] arg)
+        public static string Format(string format, params object[] args)
         {
-            if (arg.Length == 0)
+            if (args.Length == 0)
             {
                 return format;
             }
             try
             {
-                return string.Format(format, arg);
+                return string.Format(format, args);
             }
             catch
             {

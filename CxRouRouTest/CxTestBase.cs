@@ -33,10 +33,10 @@ namespace CxRouRouTest
         /// 控制台输出
         /// </summary>
         /// <param name="format"></param>
-        /// <param name="arg"></param>
-        protected static void PrintL(string format, params object[] arg)
+        /// <param name="args"></param>
+        protected static void PrintL(string format, params object[] args)
         {
-            CxConsole.WriteLine(format, arg);
+            CxConsole.WriteLine(format, args);
         }
         /// <summary>
         /// 运行测试

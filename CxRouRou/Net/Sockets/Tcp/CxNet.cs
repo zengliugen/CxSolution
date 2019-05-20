@@ -10,101 +10,25 @@ namespace CxRouRou.Net.Sockets.Tcp
     /// <summary>
     /// 网络
     /// </summary>
-    public class CxNet : CxNetBase, IDisposable
+    public class CxNet : CxNetBase
     {
-        /// <summary>
-        /// 错误类型
-        /// </summary>
-        public enum ErrorType
-        {
-            /// <summary>
-            /// 默认
-            /// </summary>
-            None = 0,
-            /// <summary>
-            /// 错误的消息标志
-            /// </summary>
-            MsgFlagError = 1001,
-            /// <summary>
-            /// 未注册的指令
-            /// </summary>
-            CmdNotRegion = 2001,
-            /// <summary>
-            /// 接收数据长度错误
-            /// </summary>
-            ReceiveDataLengthError = 4001,
-            /// <summary>
-            /// 指令处理错误
-            /// </summary>
-            CmdHandlerError = 7001,
-        }
-        /// <summary>
-        /// 发送消息队列数据
-        /// </summary>
-        private struct SendMsgQueueData
-        {
-            public uint ID;
-            public byte[] Data;
-        }
-        /// <summary>
-        /// 消息派发方法 [指令 [连接ID 指令 消息内容]]
-        /// </summary>
-        private readonly Dictionary<ushort, Action<uint, ushort, CxMsgPacket>> _msgHandler;
-        /// <summary>
-        /// 派发消息队列
-        /// </summary>
-        private readonly CxRoundQueue<Queue<SendMsgQueueData>> _dispacthMsgQueue;
-        /// <summary>
-        /// 是否使用派发消息队列
-        /// </summary>
-        private readonly bool _useDispacthMsgQueue;
-        /// <summary>
-        /// 派发消息线程
-        /// </summary>
-        private readonly Thread _dispacthMsgThread;
         /// <summary>
         /// 初始化
         /// </summary>
-        /// <param name="msgHandlerSize"></param>
-        /// <param name="useDispacthMsgQueue"></param>
-        public CxNet(int msgHandlerSize = 512, bool useDispacthMsgQueue = true)
+        public CxNet()
         {
             CxDebug.WriteLine("当前最大支持消息包长度为:{0}", CxMsgPacket.MaxLength);
-            _msgHandler = new Dictionary<ushort, Action<uint, ushort, CxMsgPacket>>(msgHandlerSize);
-            _useDispacthMsgQueue = useDispacthMsgQueue;
-            if (useDispacthMsgQueue)
-            {
-                _dispacthMsgQueue = new CxRoundQueue<Queue<SendMsgQueueData>>(2, () => new Queue<SendMsgQueueData>(256));
-                _dispacthMsgThread = CxThread.StartThread(() =>
-                  {
-                      while (true)
-                      {
-                          Queue<SendMsgQueueData> msgs;
-                          lock (_dispacthMsgQueue)
-                          {
-                              msgs = _dispacthMsgQueue.Dequeue();
-                          }
-                          while (msgs.Count > 0)
-                          {
-                              SendMsgQueueData msgData = msgs.Dequeue();
-                              OnReceiveMsgPacket(msgData.ID, msgData.Data);
-                          }
-                          Thread.Sleep(1);
-                      }
-                  }, false);
-            }
         }
         /// <summary>
         /// 设置网络配置
         /// </summary>
-        /// <param name="msgFlag"></param>
         /// <param name="poolSize"></param>
         /// <param name="receiveBufferSize"></param>
         /// <param name="receiveTimeout"></param>
         /// <param name="sendBufferSize"></param>
         /// <param name="sendTimeout"></param>
         /// <param name="listenIPv6"></param>
-        public override void SetNetConfig(ushort msgFlag = 0x1234, int poolSize = 1000, int receiveBufferSize = 8196, int receiveTimeout = 20000, int sendBufferSize = 1400, int sendTimeout = 20000, bool listenIPv6 = false)
+        public override void SetNetConfig(int poolSize = 1000, int receiveBufferSize = 8196, int receiveTimeout = 20000, int sendBufferSize = 1400, int sendTimeout = 20000, bool listenIPv6 = false)
         {
 #if DEBUG
             //检测参数是否错误
@@ -120,40 +44,7 @@ namespace CxRouRou.Net.Sockets.Tcp
                 }
             }
 #endif
-            base.SetNetConfig(msgFlag, poolSize, receiveBufferSize, receiveTimeout, sendBufferSize, sendTimeout, listenIPv6);
-        }
-        /// <summary>
-        /// 添加指令处理函数
-        /// </summary>
-        /// <param name="cmd"></param>
-        /// <param name="handler"></param>
-        public void AddMsgHandler(ushort cmd, Action<uint, ushort, CxMsgPacket> handler)
-        {
-            _msgHandler[cmd] = handler ?? throw new ArgumentNullException("handler");
-        }
-        /// <summary>
-        /// 派发消息
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="cmd"></param>
-        /// <param name="msgPacket"></param>
-        private void Dispatch(uint id, ushort cmd, CxMsgPacket msgPacket)
-        {
-            if (_msgHandler.TryGetValue(cmd, out Action<uint, ushort, CxMsgPacket> handler))
-            {
-                try
-                {
-                    handler.Invoke(id, cmd, msgPacket);
-                }
-                catch (Exception e)
-                {
-                    OnError(id, ErrorType.CmdHandlerError, CxString.Format("cmd:{0} - Error:{1}", cmd, e.Message));
-                }
-            }
-            else
-            {
-                OnError(id, ErrorType.CmdNotRegion, CxString.Format("cmd:{0} - 指令未注册", cmd));
-            }
+            base.SetNetConfig(poolSize, receiveBufferSize, receiveTimeout, sendBufferSize, sendTimeout, listenIPv6);
         }
         /// <summary>
         /// 当收到消息包
@@ -164,19 +55,7 @@ namespace CxRouRou.Net.Sockets.Tcp
         {
             BeforeUnPacket(id, data, CxMsgPacket.LengthSize, data.Length - CxMsgPacket.LengthSize);
             CxMsgPacket msgPacket = new CxMsgPacket(data) { ReadPos = CxMsgPacket.LengthSize };//从CxMsgPacket.LengthSize开始读取
-            ushort msgFlag = msgPacket.Pop_ushort();
-            ushort cmd = msgPacket.Pop_ushort();
-            if (msgFlag == _netConfig.MsgFlag)
-            {
-                if (BeforeDispacth(id, cmd))
-                {
-                    Dispatch(id, cmd, msgPacket);
-                }
-            }
-            else
-            {
-                OnError(id, ErrorType.MsgFlagError, "错误的消息标志");
-            }
+            OnReceiveMsgPacket(id, msgPacket);
         }
         /// <summary>
         /// 当收到数据 如非必要 不要重写该函数
@@ -196,22 +75,7 @@ namespace CxRouRou.Net.Sockets.Tcp
                         packageLength <= _netConfig.ReceiveBufferSize &&//小于接收缓冲区大小
                         packageLength <= (length - msgPacket.ReadPos))//小于剩余数据长度，否则可能断包，需要粘包处理
                 {
-                    //得到完整的包
-                    if (_useDispacthMsgQueue)
-                    {
-                        lock (_dispacthMsgQueue)
-                        {
-                            _dispacthMsgQueue.Peek().Enqueue(new SendMsgQueueData()
-                            {
-                                ID = receiveData.ID,
-                                Data = msgPacket.GetBytesAt(msgPacket.ReadPos - CxMsgPacket.LengthSize, packageLength + CxMsgPacket.LengthSize),
-                            });
-                        }
-                    }
-                    else
-                    {
-                        OnReceiveMsgPacket(receiveData.ID, msgPacket.GetBytesAt(msgPacket.ReadPos - CxMsgPacket.LengthSize, packageLength + CxMsgPacket.LengthSize));
-                    }
+                    OnReceiveMsgPacket(receiveData.ID, msgPacket.GetBytesAt(msgPacket.ReadPos - CxMsgPacket.LengthSize, packageLength + CxMsgPacket.LengthSize));
                     msgPacket.ReadPos += packageLength;
                     if (msgPacket.ReadPos + CxMsgPacket.LengthSize <= length)//还能解出一个包头
                     {
@@ -231,7 +95,7 @@ namespace CxRouRou.Net.Sockets.Tcp
             {
                 //长度错误
                 receiveData.Offset = 0;
-                OnError(receiveData.ID, ErrorType.ReceiveDataLengthError, CxString.Format("Length:{0} - 数据长度错误", packageLength));
+                OnError(receiveData.ID, CxString.Format("Length:{0} - 数据长度错误", packageLength));
             }
             if (length == msgPacket.ReadPos)//刚好解完数据
             {
@@ -252,10 +116,9 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// 发送消息包
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="cmd"></param>
         /// <param name="msgPacket"></param>
         /// <param name="useAsync"></param>
-        public void SendMsgPacket(uint id, ushort cmd, CxMsgPacket msgPacket, bool useAsync = true)
+        public void SendMsgPacket(uint id, CxMsgPacket msgPacket, bool useAsync = true)
         {
             if (msgPacket.Length > CxMsgPacket.MaxLength)
             {
@@ -265,30 +128,18 @@ namespace CxRouRou.Net.Sockets.Tcp
             {
                 throw new ArgumentOutOfRangeException("msgPacket", CxString.Format("发送数据过长 超过了SendBufferSize设置的大小 msgPacket.Length:{0} SendBufferSize:{1}", msgPacket.Length, _netConfig.SendBufferSize));
             }
-            msgPacket.Package(_netConfig.MsgFlag, cmd);
+            msgPacket.Package();
             BeforeSend(id, msgPacket.Data, CxMsgPacket.LengthSize, msgPacket.Length - CxMsgPacket.LengthSize);
             Send(id, msgPacket.Data, 0, msgPacket.Length, useAsync);
-        }
-        /// <summary>
-        /// 释放非托管对象
-        /// </summary>
-        public void Dispose()
-        {
-            if (_dispacthMsgThread != null)
-            {
-                _dispacthMsgThread.Abort();
-            }
         }
         #region Virtual Method
         /// <summary>
         /// 当发生错误时
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="errorType"></param>
         /// <param name="error"></param>
-        protected virtual void OnError(uint id, ErrorType errorType, string error)
+        protected virtual void OnError(uint id, string error)
         {
-
         }
         /// <summary>
         /// 在发送之前 可以进行加密操作 (只可从index开始)
@@ -313,14 +164,13 @@ namespace CxRouRou.Net.Sockets.Tcp
 
         }
         /// <summary>
-        /// 在派发之前 可以进行指令的有效性检测
+        /// 当收到消息包
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="cmd"></param>
-        /// <returns></returns>
-        protected virtual bool BeforeDispacth(uint id, ushort cmd)
+        /// <param name="msgPacket"></param>
+        protected virtual void OnReceiveMsgPacket(uint id, CxMsgPacket msgPacket)
         {
-            return true;
+
         }
         #endregion
     }

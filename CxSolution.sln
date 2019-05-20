@@ -3,19 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2026
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CxNetTestClient", "CxNetTestClient\CxNetTestClient.csproj", "{E8EF20D7-5E13-406A-8E7B-1147056FB66F}"
-	ProjectSection(ProjectDependencies) = postProject
-		{73685E29-C961-4D81-985E-66070FC03F1C} = {73685E29-C961-4D81-985E-66070FC03F1C}
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CxRouRou", "CxRouRou\CxRouRou.csproj", "{73685E29-C961-4D81-985E-66070FC03F1C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CxRouRouTest", "CxRouRouTest\CxRouRouTest.csproj", "{2883345D-E692-43F7-B0F7-25F6DC0A7C78}"
-	ProjectSection(ProjectDependencies) = postProject
-		{73685E29-C961-4D81-985E-66070FC03F1C} = {73685E29-C961-4D81-985E-66070FC03F1C}
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CxNetTestServer", "CxNetTestServer\CxNetTestServer.csproj", "{362AF890-1600-4AD7-8D81-313BEEBC5BB7}"
 	ProjectSection(ProjectDependencies) = postProject
 		{73685E29-C961-4D81-985E-66070FC03F1C} = {73685E29-C961-4D81-985E-66070FC03F1C}
 	EndProjectSection
@@ -30,18 +20,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E8EF20D7-5E13-406A-8E7B-1147056FB66F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E8EF20D7-5E13-406A-8E7B-1147056FB66F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E8EF20D7-5E13-406A-8E7B-1147056FB66F}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{E8EF20D7-5E13-406A-8E7B-1147056FB66F}.Debug|x64.Build.0 = Debug|Any CPU
-		{E8EF20D7-5E13-406A-8E7B-1147056FB66F}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{E8EF20D7-5E13-406A-8E7B-1147056FB66F}.Debug|x86.Build.0 = Debug|Any CPU
-		{E8EF20D7-5E13-406A-8E7B-1147056FB66F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E8EF20D7-5E13-406A-8E7B-1147056FB66F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E8EF20D7-5E13-406A-8E7B-1147056FB66F}.Release|x64.ActiveCfg = Release|Any CPU
-		{E8EF20D7-5E13-406A-8E7B-1147056FB66F}.Release|x64.Build.0 = Release|Any CPU
-		{E8EF20D7-5E13-406A-8E7B-1147056FB66F}.Release|x86.ActiveCfg = Release|Any CPU
-		{E8EF20D7-5E13-406A-8E7B-1147056FB66F}.Release|x86.Build.0 = Release|Any CPU
 		{73685E29-C961-4D81-985E-66070FC03F1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{73685E29-C961-4D81-985E-66070FC03F1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{73685E29-C961-4D81-985E-66070FC03F1C}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -66,18 +44,6 @@ Global
 		{2883345D-E692-43F7-B0F7-25F6DC0A7C78}.Release|x64.Build.0 = Release|Any CPU
 		{2883345D-E692-43F7-B0F7-25F6DC0A7C78}.Release|x86.ActiveCfg = Release|Any CPU
 		{2883345D-E692-43F7-B0F7-25F6DC0A7C78}.Release|x86.Build.0 = Release|Any CPU
-		{362AF890-1600-4AD7-8D81-313BEEBC5BB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{362AF890-1600-4AD7-8D81-313BEEBC5BB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{362AF890-1600-4AD7-8D81-313BEEBC5BB7}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{362AF890-1600-4AD7-8D81-313BEEBC5BB7}.Debug|x64.Build.0 = Debug|Any CPU
-		{362AF890-1600-4AD7-8D81-313BEEBC5BB7}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{362AF890-1600-4AD7-8D81-313BEEBC5BB7}.Debug|x86.Build.0 = Debug|Any CPU
-		{362AF890-1600-4AD7-8D81-313BEEBC5BB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{362AF890-1600-4AD7-8D81-313BEEBC5BB7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{362AF890-1600-4AD7-8D81-313BEEBC5BB7}.Release|x64.ActiveCfg = Release|Any CPU
-		{362AF890-1600-4AD7-8D81-313BEEBC5BB7}.Release|x64.Build.0 = Release|Any CPU
-		{362AF890-1600-4AD7-8D81-313BEEBC5BB7}.Release|x86.ActiveCfg = Release|Any CPU
-		{362AF890-1600-4AD7-8D81-313BEEBC5BB7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

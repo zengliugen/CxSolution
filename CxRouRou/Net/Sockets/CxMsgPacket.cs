@@ -1,7 +1,5 @@
-﻿//MSG_PACKAGE_SUPPORT_INT_MAX_LENGTH
-//支持int做为最大长度
+﻿using CxRouRou.Collections;
 
-using CxRouRou.Collections;
 namespace CxRouRou.Net.Sockets
 {
     /// <summary>
@@ -12,12 +10,12 @@ namespace CxRouRou.Net.Sockets
     /// 支持最大包长度 int.MaxValue 2147483647
     /// 支持最大数据长度(最大包长减去sizeof(int)) 2147483643
     /// </summary>
-    public sealed class CxMsgPacket : CxByteBuffer
+    public class CxMsgPacket : CxByteBuffer
     {
         /// <summary>
         /// 是否使用int作为最大长度
         /// </summary>
-        internal static bool UseIntMaxLength = false;
+        private static bool _useIntMaxLength = false;
         /// <summary>
         /// 最大长度
         /// </summary>
@@ -27,17 +25,9 @@ namespace CxRouRou.Net.Sockets
         /// </summary>
         internal static int LengthSize = sizeof(ushort);
         /// <summary>
-        /// 标志大小
+        /// 预留字节 LengthSize字节长度
         /// </summary>
-        internal const int FlagSize = sizeof(ushort);
-        /// <summary>
-        /// 指令大小
-        /// </summary>
-        internal const int CmdSize = sizeof(ushort);
-        /// <summary>
-        /// 预留字节 LengthSize字节长度 FlagSize字节标志 CmdSize字节指令
-        /// </summary>
-        internal static int FreeNum = LengthSize + FlagSize + CmdSize;
+        internal static int FreeNum = LengthSize;
         /// <summary>
         /// 初始化
         /// </summary>
@@ -89,18 +79,12 @@ namespace CxRouRou.Net.Sockets
         /// <summary>
         /// 包装
         /// </summary>
-        /// <param name="flag"></param>
-        /// <param name="cmd"></param>
-        internal void Package(ushort flag, ushort cmd)
+        protected internal virtual void Package()
         {
-            int length = Length;
+            var length = Length;
             WritePos = 0;
             //写入长度(不包长度自身所占字节)
             PushMsgPackageLength(length - LengthSize);
-            //写入标记
-            Push_ushort(flag);
-            //写入指令
-            Push_ushort(cmd);
             WritePos = length;
         }
         /// <summary>
@@ -109,8 +93,7 @@ namespace CxRouRou.Net.Sockets
         /// <param name="length"></param>
         internal void PushMsgPackageLength(int length)
         {
-#if MSG_PACKAGE_SUPPORT_INT_MAX_LENGTH
-            if (UseIntMaxLength)
+            if (_useIntMaxLength)
             {
                 Push_int(length);
             }
@@ -118,9 +101,6 @@ namespace CxRouRou.Net.Sockets
             {
                 Push_ushort(length);
             }
-#else
-            Push_ushort(length);
-#endif
         }
         /// <summary>
         /// 读取消息包长度
@@ -128,8 +108,7 @@ namespace CxRouRou.Net.Sockets
         /// <returns></returns>
         internal int PopMsgPackageLength()
         {
-#if MSG_PACKAGE_SUPPORT_INT_MAX_LENGTH
-            if (UseIntMaxLength)
+            if (_useIntMaxLength)
             {
                 return Pop_int();
             }
@@ -137,29 +116,16 @@ namespace CxRouRou.Net.Sockets
             {
                 return Pop_ushort();
             }
-#else
-            return Pop_ushort();
-#endif
         }
-#if MSG_PACKAGE_SUPPORT_INT_MAX_LENGTH
         /// <summary>
         /// 支持int作为最大长度
         /// </summary>
         public static void SupportIntMaxLength()
         {
+            _useIntMaxLength = true;
             MaxLength = int.MaxValue;
             LengthSize = sizeof(int);
-            FreeNum = LengthSize + FlagSize + CmdSize;
-            UseIntMaxLength = true;
-        }
-#endif
-        /// <summary>
-        /// 获取预留字节 LengthSize字节长度 FlagSize字节标志 CmdSize字节指令
-        /// </summary>
-        /// <returns></returns>
-        public static int GetFreeNum()
-        {
-            return FreeNum;
+            FreeNum = LengthSize;
         }
     }
 }

@@ -52,25 +52,31 @@ namespace CxRouRouTest.Net.Sockets.Tcp
             net.CheckMsgLength = 5;
             net.ConnectOkAction = () =>
             {
+                var index = 1;
                 Thread.Sleep(1000);
-                CxMsgPacket msgPacket = new CxMsgPacket(1400);
-                msgPacket.Push(CxArray.CreateRandomByte(1400 - CxMsgPacket.GetFreeNum() - 2));
+                CxMsgPacket msgPacket = new CxMsgPacket(4);
+                msgPacket.Push_int(index++);
+                msgPacket.Push(CxArray.CreateRandomByte(20));
                 net.SendMsg(msgPacket);
                 Thread.Sleep(1000);
-                msgPacket = new CxMsgPacket(1400);
-                msgPacket.Push(CxArray.CreateRandomByte(1400 - CxMsgPacket.GetFreeNum() - 2));
+                msgPacket = new CxMsgPacket(4);
+                msgPacket.Push_int(index++);
+                msgPacket.Push(CxArray.CreateRandomByte(20));
                 net.SendMsg(msgPacket);
                 Thread.Sleep(1000);
-                msgPacket = new CxMsgPacket(1400);
-                msgPacket.Push(CxArray.CreateRandomByte(1400 - CxMsgPacket.GetFreeNum() - 2));
+                msgPacket = new CxMsgPacket(4);
+                msgPacket.Push_int(index++);
+                msgPacket.Push(CxArray.CreateRandomByte(20));
                 net.SendMsg(msgPacket);
                 Thread.Sleep(1000);
-                msgPacket = new CxMsgPacket(1400);
-                msgPacket.Push(CxArray.CreateRandomByte(1400 - CxMsgPacket.GetFreeNum() - 2));
+                msgPacket = new CxMsgPacket(4);
+                msgPacket.Push_int(index++);
+                msgPacket.Push(CxArray.CreateRandomByte(20));
                 net.SendMsg(msgPacket);
                 Thread.Sleep(1000);
-                msgPacket = new CxMsgPacket(1400);
-                msgPacket.Push(CxArray.CreateRandomByte(1400 - CxMsgPacket.GetFreeNum() - 2));
+                msgPacket = new CxMsgPacket(4);
+                msgPacket.Push_int(index++);
+                msgPacket.Push(CxArray.CreateRandomByte(20));
                 net.SendMsg(msgPacket);
             };
             net.ErrorAction = (error) =>
@@ -103,7 +109,6 @@ namespace CxRouRouTest.Net.Sockets.Tcp
                 }
                 Thread.Sleep(1);
             }
-            net.Dispose();
             net = null;
             return result;
         }
@@ -120,36 +125,11 @@ namespace CxRouRouTest.Net.Sockets.Tcp
             public Action<string> MsgAction;
             public TestNet()
             {
-                AddMsgHandler(1, (id, cmd, msgPacket) =>
-                {
-                    MsgAction.Invoke("收到消息包" + msgPacket.Length);
-                    ReceiveMsgs.Add(msgPacket);
-                    if (ReceiveMsgs.Count >= CheckMsgLength)
-                    {
-                        if (SendMsgs.Count != ReceiveMsgs.Count)
-                        {
-                            RunResulttAction(false);
-                        }
-                        else
-                        {
-                            bool isOk = true;
-                            for (int i = 0; i < SendMsgs.Count; i++)
-                            {
-                                if (!SendMsgs[i].Equals(ReceiveMsgs[i]))
-                                {
-                                    isOk = false;
-                                    break;
-                                }
-                            }
-                            RunResulttAction(isOk);
-                        }
-                    }
-                });
             }
             public void SendMsg(CxMsgPacket msgPacket)
             {
                 MsgAction.Invoke("发送消息包" + msgPacket.Length);
-                SendMsgPacket(ConnectID, 1, msgPacket);
+                SendMsgPacket(ConnectID, msgPacket);
                 SendMsgs.Add(msgPacket);
             }
             protected override void OnStartListenAcceptFail(ushort port, string error)
@@ -175,7 +155,7 @@ namespace CxRouRouTest.Net.Sockets.Tcp
             {
                 ErrorAction.Invoke(message);
             }
-            protected override void OnError(uint id, ErrorType errorType, string error)
+            protected override void OnError(uint id, string error)
             {
                 ErrorAction.Invoke(error);
             }
@@ -186,6 +166,32 @@ namespace CxRouRouTest.Net.Sockets.Tcp
             protected override void OnAcceptSuccess(uint id, string address)
             {
                 MsgAction.Invoke("接受连接成功");
+            }
+            protected override void OnReceiveMsgPacket(uint id, CxMsgPacket msgPacket)
+            {
+                MsgAction.Invoke("收到消息包" + msgPacket.Length);
+                MsgAction.Invoke("content:" + msgPacket.Pop_int());
+                ReceiveMsgs.Add(msgPacket);
+                if (ReceiveMsgs.Count >= CheckMsgLength)
+                {
+                    if (SendMsgs.Count != ReceiveMsgs.Count)
+                    {
+                        RunResulttAction(false);
+                    }
+                    else
+                    {
+                        bool isOk = true;
+                        for (int i = 0; i < SendMsgs.Count; i++)
+                        {
+                            if (!SendMsgs[i].Equals(ReceiveMsgs[i]))
+                            {
+                                isOk = false;
+                                break;
+                            }
+                        }
+                        RunResulttAction(isOk);
+                    }
+                }
             }
         }
     }
