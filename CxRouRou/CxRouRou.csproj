@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <Folder Include="Net\Sockets\Udp\" />
+    <Folder Include="Manager\" />
   </ItemGroup>
 
 </Project>

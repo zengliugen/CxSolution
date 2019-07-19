@@ -177,14 +177,14 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// </summary>
         private void PushSendSaea()
         {
-            if (_sendSaea == null) return;
-            SocketAsyncEventArgs tempSendSaea = _sendSaea;
-            lock (_sendSaea)
+            var tempSendSaea = _sendSaea;
+            lock (_syncLock)
             {
+                if (_sendSaea == null) return;
                 _sendSaea = null;
             }
             tempSendSaea.Completed -= SendCallBack;
-            //此时可能还未发送过消息，BufferList未空
+            //此时可能还未发送过消息，BufferList为空
             if (tempSendSaea.BufferList != null)
             {
                 tempSendSaea.BufferList.Clear();

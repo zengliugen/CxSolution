@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using CxRouRou.Collections;
 using CxRouRou.Util;
 
@@ -69,7 +70,7 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// <param name="listenIPv6"></param>
         public virtual void SetNetConfig(int poolSize = 1000, int receiveBufferSize = 8196, int receiveTimeout = 20000, int sendBufferSize = 1400, int sendTimeout = 20000, bool listenIPv6 = false)
         {
-            if (_isIntFlag != 0)
+            if (_isIntFlag == 0)
             {
                 throw new MethodAccessException("设置网络配置无效，应在启动服务或连接服务器之前调用");
             }
@@ -85,8 +86,7 @@ namespace CxRouRou.Net.Sockets.Tcp
         /// </summary>
         protected void Init()
         {
-            if (_isIntFlag != 0) return;
-            _isIntFlag++;
+            if (Interlocked.Exchange(ref _isIntFlag, 1) == 1) return;
             _saeaPool = CxPool<SocketAsyncEventArgs>.ThreadSafePool(_netConfig.PoolSize, () =>
             {
                 return new SocketAsyncEventArgs();
