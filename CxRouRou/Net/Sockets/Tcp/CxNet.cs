@@ -1,11 +1,11 @@
-﻿using CxRouRou.Collections;
-using CxRouRou.Util;
+﻿using CxSolution.CxRouRou.Collections;
+using CxSolution.CxRouRou.Util;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 
-namespace CxRouRou.Net.Sockets.Tcp
+namespace CxSolution.CxRouRou.Net.Sockets.Tcp
 {
     /// <summary>
     /// 网络

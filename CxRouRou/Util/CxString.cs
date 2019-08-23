@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CxRouRou.Util
+namespace CxSolution.CxRouRou.Util
 {
     /// <summary>
     /// 字符串操作

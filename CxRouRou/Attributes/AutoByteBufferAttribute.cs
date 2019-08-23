@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CxRouRou.Attributes
+namespace CxSolution.CxRouRou.Attributes
 {
     /// <summary>
     /// ByteBuffer自动压入弹出属性

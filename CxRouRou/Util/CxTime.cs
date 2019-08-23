@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CxRouRou.Util
+namespace CxSolution.CxRouRou.Util
 {
     /// <summary>
     /// 时间操作

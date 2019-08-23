@@ -1,11 +1,11 @@
-﻿using CxRouRou.Util;
+﻿using CxSolution.CxRouRou.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CxRouRouTest
+namespace CxSolution.CxRouRouTest
 {
     /// <summary>
     /// 测试基类

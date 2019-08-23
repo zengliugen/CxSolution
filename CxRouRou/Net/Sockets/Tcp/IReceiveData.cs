@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CxRouRou.Net.Sockets.Tcp
+namespace CxSolution.CxRouRou.Net.Sockets.Tcp
 {
     /// <summary>
     /// 收到数据结构

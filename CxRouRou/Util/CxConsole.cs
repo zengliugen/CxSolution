@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CxRouRou.Util
+namespace CxSolution.CxRouRou.Util
 {
     /// <summary>
     /// 控制台操作

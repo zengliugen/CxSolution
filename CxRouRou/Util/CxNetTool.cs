@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace CxRouRou.Util
+namespace CxSolution.CxRouRou.Util
 {
     /// <summary>
     /// 网络工具

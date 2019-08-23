@@ -2,12 +2,12 @@
 using System;
 using System.Text;
 using System.Collections;
-using CxRouRou.Util;
+using CxSolution.CxRouRou.Util;
 using System.Collections.Generic;
 using System.Reflection;
-using CxRouRou.Attributes;
+using CxSolution.CxRouRou.Attributes;
 
-namespace CxRouRou.Collections
+namespace CxSolution.CxRouRou.Collections
 {
     /// <summary>
     /// 字节缓冲区

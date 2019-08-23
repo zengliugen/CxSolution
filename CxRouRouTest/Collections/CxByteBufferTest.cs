@@ -1,5 +1,5 @@
-﻿using CxRouRou.Attributes;
-using CxRouRou.Collections;
+﻿using CxSolution.CxRouRou.Attributes;
+using CxSolution.CxRouRou.Collections;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CxRouRouTest.Collections
+namespace CxSolution.CxRouRouTest.Collections
 {
     /// <summary>
     /// CxByteBuffer测试

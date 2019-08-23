@@ -1,6 +1,6 @@
-﻿using CxRouRou.Collections;
-using CxRouRou.Net.Sockets;
-using CxRouRou.Net.Sockets.Tcp;
+﻿using CxSolution.CxRouRou.Collections;
+using CxSolution.CxRouRou.Net.Sockets;
+using CxSolution.CxRouRou.Net.Sockets.Tcp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics;
-namespace CxRouRouTest.Net.Sockets.Tcp
+namespace CxSolution.CxRouRouTest.Net.Sockets.Tcp
 {
     /// <summary>
     /// 网络测试

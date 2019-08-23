@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CxRouRou.Collections
+namespace CxSolution.CxRouRou.Collections
 {
     /// <summary>
     /// 循环队列

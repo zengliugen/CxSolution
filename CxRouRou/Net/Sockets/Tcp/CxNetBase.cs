@@ -4,10 +4,10 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using CxRouRou.Collections;
-using CxRouRou.Util;
+using CxSolution.CxRouRou.Collections;
+using CxSolution.CxRouRou.Util;
 
-namespace CxRouRou.Net.Sockets.Tcp
+namespace CxSolution.CxRouRou.Net.Sockets.Tcp
 {
     /// <summary>
     /// 关闭类型

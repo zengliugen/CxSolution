@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
-namespace CxRouRou.Util
+namespace CxSolution.CxRouRou.Util
 {
     /// <summary>
     /// 调试操作

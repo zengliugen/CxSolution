@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
-using CxRouRou.Collections;
+using CxSolution.CxRouRou.Collections;
 
-namespace CxRouRou.Net.Sockets.Tcp
+namespace CxSolution.CxRouRou.Net.Sockets.Tcp
 {
     /// <summary>
     /// 会话网络类型枚举

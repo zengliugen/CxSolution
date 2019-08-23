@@ -1,6 +1,6 @@
-﻿using CxRouRou.Collections;
+﻿using CxSolution.CxRouRou.Collections;
 
-namespace CxRouRou.Net.Sockets
+namespace CxSolution.CxRouRou.Net.Sockets
 {
     /// <summary>
     /// 消息包
