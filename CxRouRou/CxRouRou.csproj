@@ -20,7 +20,6 @@
   <ItemGroup>
     <Folder Include="Net\Sockets\Udp\" />
     <Folder Include="Manager\" />
-    <Folder Include="Security\" />
   </ItemGroup>
 
 </Project>
