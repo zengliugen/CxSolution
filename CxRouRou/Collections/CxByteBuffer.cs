@@ -1,11 +1,12 @@
-﻿//#undef DEBUG
+﻿//CHECK_LOOP_REFERENCE_OFF 自动压入弹出 检查循环引用是否关闭
 using System;
-using System.Text;
 using System.Collections;
-using CxSolution.CxRouRou.Util;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text;
+
 using CxSolution.CxRouRou.Attributes;
+using CxSolution.CxRouRou.Util;
 
 namespace CxSolution.CxRouRou.Collections
 {
@@ -705,7 +706,7 @@ namespace CxSolution.CxRouRou.Collections
         /// 特性判断类型
         /// </summary>
         private static readonly Type ByteBufferAttributeType = typeof(AutoByteBufferAttribute);
-#if DEBUG
+#if !CHECK_LOOP_REFERENCE_OFF
         /// <summary>
         /// 自动压入
         /// </summary>
@@ -728,7 +729,7 @@ namespace CxSolution.CxRouRou.Collections
             {
                 throw new NullReferenceException("压入对象不可为空");
             }
-#if DEBUG
+#if !CHECK_LOOP_REFERENCE_OFF
             if (flags == null)
             {
                 flags = new Dictionary<object, int>();
@@ -795,7 +796,7 @@ namespace CxSolution.CxRouRou.Collections
                 //结构体
                 else
                 {
-#if DEBUG
+#if !CHECK_LOOP_REFERENCE_OFF
                     AutoPushStructOrClass(ref typeInfo, ref obj, flags);
 #else
                     AutoPushStructOrClass(ref typeInfo, ref obj);
@@ -808,7 +809,7 @@ namespace CxSolution.CxRouRou.Collections
                 //Array
                 if (type.IsArray)
                 {
-#if DEBUG
+#if !CHECK_LOOP_REFERENCE_OFF
                     //保存标记，防止循环引用
                     flags.Add(obj, 1);
 #endif
@@ -826,7 +827,7 @@ namespace CxSolution.CxRouRou.Collections
                             Push((ushort)length);
                             for (int i = 0; i < length; i++)
                             {
-#if DEBUG
+#if !CHECK_LOOP_REFERENCE_OFF
                                 AutoPush(array.GetValue(i), flags);
 #else
                                 AutoPush(array.GetValue(i));
@@ -843,7 +844,7 @@ namespace CxSolution.CxRouRou.Collections
                 //IList
                 else if (IListType.IsAssignableFrom(type))
                 {
-#if DEBUG
+#if !CHECK_LOOP_REFERENCE_OFF
                     //保存标记，防止循环引用
                     flags.Add(obj, 1);
 #endif
@@ -853,7 +854,7 @@ namespace CxSolution.CxRouRou.Collections
                         Push((ushort)count);
                         for (int i = 0; i < count; i++)
                         {
-#if DEBUG
+#if !CHECK_LOOP_REFERENCE_OFF
                             AutoPush(list[i], flags);
 #else
                             AutoPush(list[i]);
@@ -864,7 +865,7 @@ namespace CxSolution.CxRouRou.Collections
                 //IDictionary
                 else if (IDictionaryType.IsAssignableFrom(type))
                 {
-#if DEBUG
+#if !CHECK_LOOP_REFERENCE_OFF
                     //保存标记，防止循环引用
                     flags.Add(obj, 1);
 #endif
@@ -874,7 +875,7 @@ namespace CxSolution.CxRouRou.Collections
                         Push((ushort)count);
                         foreach (DictionaryEntry kv in dictionary)
                         {
-#if DEBUG
+#if !CHECK_LOOP_REFERENCE_OFF
                             AutoPush(kv.Key, flags);
                             AutoPush(kv.Value, flags);
 #else
@@ -887,7 +888,7 @@ namespace CxSolution.CxRouRou.Collections
                 //其他类类型
                 else
                 {
-#if DEBUG
+#if !CHECK_LOOP_REFERENCE_OFF
                     AutoPushStructOrClass(ref typeInfo, ref obj, flags);
 #else
                     AutoPushStructOrClass(ref typeInfo, ref obj);
@@ -902,7 +903,7 @@ namespace CxSolution.CxRouRou.Collections
             }
             return this;
         }
-#if DEBUG
+#if !CHECK_LOOP_REFERENCE_OFF
 
         /// <summary>
         /// 自动压入结构体或类
@@ -935,7 +936,7 @@ namespace CxSolution.CxRouRou.Collections
                 FieldInfo fieldInfo = fieldInfos[i];
                 if (fieldInfo.GetCustomAttribute(ByteBufferAttributeType) is AutoByteBufferAttribute byteBufferAttribute && byteBufferAttribute.Handle)
                 {
-#if DEBUG
+#if !CHECK_LOOP_REFERENCE_OFF
                     AutoPush(fieldInfo.GetValue(obj), flags);
 #else
                     AutoPush(fieldInfo.GetValue(obj));
@@ -956,7 +957,7 @@ namespace CxSolution.CxRouRou.Collections
                 PropertyInfo propertyInfo = propertyInfos[i];
                 if (propertyInfo.GetCustomAttribute(ByteBufferAttributeType) is AutoByteBufferAttribute byteBufferAttribute && byteBufferAttribute.Handle)
                 {
-#if DEBUG
+#if !CHECK_LOOP_REFERENCE_OFF
                     AutoPush(propertyInfo.GetValue(obj), flags);
 #else
                     AutoPush(propertyInfo.GetValue(obj));

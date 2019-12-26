@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace CxSolution.CxRouRou.Collections
@@ -52,6 +51,32 @@ namespace CxSolution.CxRouRou.Collections
             T[] ts = new T[length];
             Array.Copy(source, index, ts, 0, length);
             return ts;
+        }
+        /// <summary>
+        /// 数组转字符串
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static string ToStringEx<T>(this T[] source)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException();
+            }
+            StringBuilder sb = new StringBuilder();
+            sb.Append("[");
+            int count = source.Length;
+            for (int i = 0; i < count; i++)
+            {
+                sb.Append(source[i]);
+                if (i < count - 1)
+                {
+                    sb.Append(",");
+                }
+            }
+            sb.Append("]");
+            return sb.ToString();
         }
         /// <summary>
         /// 创建随机byte数组

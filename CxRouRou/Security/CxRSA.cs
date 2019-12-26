@@ -1,50 +1,50 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace CxSolution.CxRouRou.Security
 {
+    /// <summary>
+    /// RSA秘钥信息
+    /// </summary>
+    public struct RSAKeyInfo
+    {
+        /// <summary>
+        /// 公钥
+        /// </summary>
+        public string Public { get; set; }
+        /// <summary>
+        /// 私钥
+        /// </summary>
+        public string Private { get; set; }
+    }
     /// <summary>
     /// RSA加密
     /// </summary>
     public class CxRSA
     {
         /// <summary>
-        /// 公钥加解密对象
+        /// 生成RSA秘钥信息
         /// </summary>
-        private readonly RSACryptoServiceProvider publicRAS;
-        /// <summary>
-        /// 私钥加解密对象
-        /// </summary>
-        private readonly RSACryptoServiceProvider privateRAS;
-        /// <summary>
-        /// 初始化
-        /// </summary>
-        /// <param name="publicKey">公钥</param>
-        /// <param name="privateKey">私钥</param>
-        public CxRSA(string publicKey, string privateKey)
+        /// <returns></returns>
+        public static RSAKeyInfo CreateRSAKey()
         {
-            if (!string.IsNullOrEmpty(publicKey))
-            {
-                publicRAS = new RSACryptoServiceProvider();
-            }
-            if (!string.IsNullOrEmpty(privateKey))
-            {
-                privateRAS = new RSACryptoServiceProvider();
-            }
+            var rsa = new RSACryptoServiceProvider();
+            return new RSAKeyInfo { Private = rsa.ToXmlString(true), Public = rsa.ToXmlString(false) };
         }
         /// <summary>
         /// 公钥加密
         /// </summary>
-        /// <param name="data"></param>
-        /// <param name="fOAEP"></param>
-        /// <returns></returns>
-        public byte[] PublicEncrypt(byte[] data, bool fOAEP = false)
+        /// <param name="publicKey">公钥</param>
+        /// <param name="data">待加密数据</param>
+        /// <param name="fOAEP">是否使用OAEP填充方式</param>
+        /// <returns>加密后的数据</returns>
+        public static byte[] Encrypt(string publicKey, byte[] data, bool fOAEP = false)
         {
             try
             {
-                var _data = publicRAS.Encrypt(data, fOAEP);
+                var rsa = new RSACryptoServiceProvider();
+                rsa.FromXmlString(publicKey);
+                var _data = rsa.Encrypt(data, fOAEP);
                 return _data;
             }
             catch (Exception e)
@@ -53,16 +53,19 @@ namespace CxSolution.CxRouRou.Security
             }
         }
         /// <summary>
-        /// 公钥解密
+        /// 私钥解密
         /// </summary>
-        /// <param name="data"></param>
-        /// <param name="fOAEP"></param>
-        /// <returns></returns>
-        public byte[] PublicDecrypt(byte[] data, bool fOAEP = false)
+        /// <param name="privateKey">私钥</param>
+        /// <param name="data">待解密数据</param>
+        /// <param name="fOAEP">是否使用OAEP填充方式</param>
+        /// <returns>解密后的数据</returns>
+        public static byte[] Decrypt(string privateKey, byte[] data, bool fOAEP = false)
         {
             try
             {
-                var _data = publicRAS.Decrypt(data, fOAEP);
+                var rsa = new RSACryptoServiceProvider();
+                rsa.FromXmlString(privateKey);
+                var _data = rsa.Decrypt(data, fOAEP);
                 return _data;
             }
             catch (Exception e)
@@ -72,17 +75,26 @@ namespace CxSolution.CxRouRou.Security
             }
         }
         /// <summary>
-        /// 私钥加密
+        /// 私钥数字签名
         /// </summary>
-        /// <param name="data"></param>
-        /// <param name="fOAEP"></param>
-        /// <returns></returns>
-        public byte[] PrivateEncrypt(byte[] data, bool fOAEP = false)
+        /// <param name="privateKey">私钥</param>
+        /// <param name="data">待数字签名的数据</param>
+        /// <param name="halg">要用于创建哈希值的哈希算法</param>
+        /// <returns>数字签名数据</returns>
+        public static byte[] SignData(string privateKey, byte[] data, object halg = null)
         {
             try
             {
-                var _data = privateRAS.Encrypt(data, fOAEP);
-                return _data;
+                var rsa = new RSACryptoServiceProvider();
+                rsa.FromXmlString(privateKey);
+                if (halg == null)
+                {
+                    return rsa.SignData(data, new SHA1CryptoServiceProvider());
+                }
+                else
+                {
+                    return rsa.SignData(data, halg);
+                }
             }
             catch (Exception e)
             {
@@ -90,17 +102,27 @@ namespace CxSolution.CxRouRou.Security
             }
         }
         /// <summary>
-        /// 解密
+        /// 公钥验证数字签名
         /// </summary>
-        /// <param name="data"></param>
-        /// <param name="fOAEP"></param>
-        /// <returns></returns>
-        public byte[] PrivateDecrypt(byte[] data, bool fOAEP = false)
+        /// <param name="publicKey">公钥</param>
+        /// <param name="data">带验证数字签名的数据</param>
+        /// <param name="signData">数字签名数据</param>
+        /// <param name="halg">要用于创建哈希值的哈希算法</param>
+        /// <returns>数字签名是否有效</returns>
+        public static bool VerifyData(string publicKey, byte[] data, byte[] signData, object halg = null)
         {
             try
             {
-                var _data = privateRAS.Decrypt(data, fOAEP);
-                return _data;
+                var rsa = new RSACryptoServiceProvider();
+                rsa.FromXmlString(publicKey);
+                if (halg == null)
+                {
+                    return rsa.VerifyData(data, new SHA1CryptoServiceProvider(), signData);
+                }
+                else
+                {
+                    return rsa.VerifyData(data, halg, signData);
+                }
             }
             catch (Exception e)
             {

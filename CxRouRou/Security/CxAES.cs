@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CxSolution.CxRouRou.Security
+﻿namespace CxSolution.CxRouRou.Security
 {
     /// <summary>
     /// AES加密

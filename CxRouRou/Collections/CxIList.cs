@@ -55,7 +55,7 @@ namespace CxSolution.CxRouRou.Collections
                 throw new ArgumentNullException();
             }
             StringBuilder sb = new StringBuilder();
-            sb.Append("{");
+            sb.Append("[");
             int count = source.Count;
             for (int i = 0; i < count; i++)
             {
@@ -65,7 +65,7 @@ namespace CxSolution.CxRouRou.Collections
                     sb.Append(",");
                 }
             }
-            sb.Append("}");
+            sb.Append("]");
             return sb.ToString();
         }
     }

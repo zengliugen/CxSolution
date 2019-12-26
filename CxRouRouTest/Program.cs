@@ -1,7 +1,6 @@
 ﻿using System;
-using CxSolution.CxRouRouTest.Net.Sockets.Tcp;
 
-namespace CXRouRouTest
+namespace CxSolution.CXRouRouTest
 {
     class Program
     {
@@ -9,10 +8,10 @@ namespace CXRouRouTest
         {
             //CxByteBufferTest byteBufferTest = new CxByteBufferTest("CxByteBufferTest");
             //byteBufferTest.Run();
-            CxNetTest netTest = new CxNetTest("CxNetTest");
-            netTest.Run();
-
-            //CxConsole.WriteLine("%d", 0x4aa210b4);
+            //CxNetTest netTest = new CxNetTest("CxNetTest");
+            //netTest.Run();
+            CxRouRouTest.Security.CxRSATest rsaTest = new CxRouRouTest.Security.CxRSATest("CxRSATest");
+            rsaTest.Run();
 
             Console.ReadKey();
         }

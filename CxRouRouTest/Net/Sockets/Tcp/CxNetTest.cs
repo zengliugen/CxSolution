@@ -1,13 +1,12 @@
-﻿using CxSolution.CxRouRou.Collections;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading;
+
+using CxSolution.CxRouRou.Collections;
 using CxSolution.CxRouRou.Net.Sockets;
 using CxSolution.CxRouRou.Net.Sockets.Tcp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Diagnostics;
+
 namespace CxSolution.CxRouRouTest.Net.Sockets.Tcp
 {
     /// <summary>

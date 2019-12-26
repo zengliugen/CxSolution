@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CxSolution.CxRouRou.Net.Sockets.Tcp
+﻿namespace CxSolution.CxRouRou.Net.Sockets.Tcp
 {
     /// <summary>
     /// 收到数据结构
