@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
+using CxSolution.CxRouRou.Collections;
+using CxSolution.CxRouRou.Security;
 
 namespace CxSolution.Test
 {
@@ -7,7 +9,10 @@ namespace CxSolution.Test
     {
         static void Main(string[] args)
         {
-            Test();
+            //Test();
+            var AESKey = CxAES.CreateAESKey();
+            Console.WriteLine(AESKey.Key.ToHexString());
+            Console.WriteLine(AESKey.IV.ToHexString());
 
             Console.ReadKey();
         }

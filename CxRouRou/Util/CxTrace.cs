@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
+using CxSolution.CxRouRou.Collections;
+
 namespace CxSolution.CxRouRou.Util
 {
     /// <summary>

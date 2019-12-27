@@ -1,17 +1,19 @@
 ﻿using System;
 
-namespace CxSolution.CXRouRouTest
+namespace CxSolution.CxRouRouTest
 {
     class Program
     {
         static void Main(string[] args)
         {
-            //CxByteBufferTest byteBufferTest = new CxByteBufferTest("CxByteBufferTest");
+            //Collections.CxByteBufferTest bytebufferTest = new Collections.CxByteBufferTest("CxByteBufferTest");
             //byteBufferTest.Run();
-            //CxNetTest netTest = new CxNetTest("CxNetTest");
+            //Net.Sockets.Tcp.CxNetTest netTest = new Net.Sockets.Tcp.CxNetTest("CxNetTest");
             //netTest.Run();
-            CxRouRouTest.Security.CxRSATest rsaTest = new CxRouRouTest.Security.CxRSATest("CxRSATest");
-            rsaTest.Run();
+            //Security.CxRSATest rsaTest = new CxRouRouTest.Security.CxRSATest("CxRSATest");
+            //rsaTest.Run();
+            Security.CxAESTest aesTest = new Security.CxAESTest("CxAESTest");
+            aesTest.Run();
 
             Console.ReadKey();
         }

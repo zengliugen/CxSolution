@@ -11,6 +11,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CxRouRouTest", "CxRouRouTes
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{A838F928-CB50-4A96-B58F-47F5A542A7AD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{73685E29-C961-4D81-985E-66070FC03F1C} = {73685E29-C961-4D81-985E-66070FC03F1C}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -64,6 +64,7 @@
     <Compile Include="Net\Sockets\Tcp\CxNetTest.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Security\CxAESTest.cs" />
     <Compile Include="Security\CxRSATest.cs" />
   </ItemGroup>
   <ItemGroup>

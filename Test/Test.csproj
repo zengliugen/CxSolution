@@ -49,5 +49,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CxRouRou\CxRouRou.csproj">
+      <Project>{73685e29-c961-4d81-985e-66070fc03f1c}</Project>
+      <Name>CxRouRou</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
