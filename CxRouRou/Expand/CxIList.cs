@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CxSolution.CxRouRou.Collections
+namespace CxSolution.CxRouRou.Expand
 {
     /// <summary>
     /// IList操作

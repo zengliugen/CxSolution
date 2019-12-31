@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 
-using CxSolution.CxRouRou.Collections;
+using CxSolution.CxRouRou.Expand;
 using CxSolution.CxRouRou.Net.Sockets;
 using CxSolution.CxRouRou.Net.Sockets.Tcp;
 

@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-using CxSolution.CxRouRou.Collections;
+using CxSolution.CxRouRou.Expand;
 using CxSolution.CxRouRou.Security;
 
 namespace CxSolution.CxRouRouTest.Security

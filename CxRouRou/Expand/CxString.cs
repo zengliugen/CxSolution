@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CxSolution.CxRouRou.Util
+﻿namespace CxSolution.CxRouRou.Expand
 {
     /// <summary>
     /// 字符串操作
@@ -30,6 +26,16 @@ namespace CxSolution.CxRouRou.Util
                 //忽略
             }
             return format;
+        }
+        /// <summary>
+        /// 格式化
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        public static string FormatSelf(this string source, params object[] args)
+        {
+            return Format(source, args);
         }
     }
 }

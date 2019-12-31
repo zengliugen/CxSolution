@@ -1,4 +1,4 @@
-﻿namespace CxSolution.CxRouRou.Collections
+﻿namespace CxSolution.CxRouRou.Expand
 {
     /// <summary>
     /// 对象操作

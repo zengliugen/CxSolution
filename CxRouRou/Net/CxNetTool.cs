@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
-namespace CxSolution.CxRouRou.Util
+namespace CxSolution.CxRouRou.Net
 {
     /// <summary>
     /// 网络工具

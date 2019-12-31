@@ -1,11 +1,10 @@
-﻿using CxSolution.CxRouRou.Attributes;
-using CxSolution.CxRouRou.Collections;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+
+using CxSolution.CxRouRou.Attributes;
+using CxSolution.CxRouRou.Collections;
+using CxSolution.CxRouRou.Expand;
 
 namespace CxSolution.CxRouRouTest.Collections
 {
@@ -128,7 +127,7 @@ namespace CxSolution.CxRouRouTest.Collections
             result = byteBuffer.Pop_double() == value_double;
             PrintL("double value:{0} result:{1}", value_double, result);
             resultList.Add(result);
-            result = byteBuffer.Pop_bytes().EqualsEx(value_bytes);
+            result = byteBuffer.Pop_bytes().Equals(value_bytes);
             PrintL("bytes value:{0} result:{1}", value_bytes.ToStringEx(), result);
             resultList.Add(result);
             result = byteBuffer.Pop_string() == value_string;
