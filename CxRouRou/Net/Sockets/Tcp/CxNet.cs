@@ -1,6 +1,6 @@
 ﻿using System;
 
-using CxSolution.CxRouRou.Expand;
+using CxSolution.CxRouRou.Expands;
 using CxSolution.CxRouRou.Util;
 
 namespace CxSolution.CxRouRou.Net.Sockets.Tcp

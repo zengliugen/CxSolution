@@ -1,6 +1,6 @@
 ﻿using System;
 
-using CxSolution.CxRouRou.Expand;
+using CxSolution.CxRouRou.Expands;
 
 namespace CxSolution.CxRouRou.Util
 {

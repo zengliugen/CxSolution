@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 
 using CxSolution.CxRouRou.Attributes;
-using CxSolution.CxRouRou.Expand;
+using CxSolution.CxRouRou.Expands;
 
 namespace CxSolution.CxRouRou.Collections
 {

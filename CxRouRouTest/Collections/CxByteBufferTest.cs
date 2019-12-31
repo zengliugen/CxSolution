@@ -4,7 +4,7 @@ using System.Text;
 
 using CxSolution.CxRouRou.Attributes;
 using CxSolution.CxRouRou.Collections;
-using CxSolution.CxRouRou.Expand;
+using CxSolution.CxRouRou.Expands;
 
 namespace CxSolution.CxRouRouTest.Collections
 {

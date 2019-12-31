@@ -2,23 +2,24 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CxSolution.CxRouRou.Expand
+namespace CxSolution.CxRouRou.Expands
 {
     /// <summary>
-    /// IList操作
+    /// IDictionary操作
     /// </summary>
-    public static class CxIList
+    public static class CxIDictionary
     {
         /// <summary>
-        /// 比较IList是否相同
+        /// 比较IDictionary是否相同
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T1"></typeparam>
+        /// <typeparam name="T2"></typeparam>
         /// <param name="source"></param>
         /// <param name="target"></param>
         /// <returns></returns>
-        public static bool EqualsEx<T>(this IList<T> source, IList<T> target)
+        public static bool EqualsEx<T1, T2>(this IDictionary<T1, T2> source, IDictionary<T1, T2> target)
         {
-            if (source == null && target == null)
+            if (source==null && target == null)
             {
                 return true;
             }
@@ -34,9 +35,9 @@ namespace CxSolution.CxRouRou.Expand
             {
                 return false;
             }
-            for (int i = 0; i < source.Count; i++)
+            foreach (var item in source)
             {
-                if (!source[i].Equals(target[i]))
+                if (!item.Value.Equals(target[item.Key]))
                 {
                     return false;
                 }
@@ -44,28 +45,35 @@ namespace CxSolution.CxRouRou.Expand
             return true;
         }
         /// <summary>
-        /// IList转字符串
+        /// IDictionary转字符串
         /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <typeparam name="T2"></typeparam>
         /// <param name="source"></param>
         /// <returns></returns>
-        public static string ToStringEx<T>(this IList<T> source)
+        public static string ToStringEx<T1, T2>(this IDictionary<T1, T2> source)
         {
             if (source == null)
             {
                 throw new ArgumentNullException();
             }
             StringBuilder sb = new StringBuilder();
-            sb.Append("[");
-            int count = source.Count;
-            for (int i = 0; i < count; i++)
+            sb.Append("{");
+            int index = 0;
+            foreach (var item in source)
             {
-                sb.Append(source[i]);
-                if (i < count - 1)
+                sb.Append("{");
+                sb.Append(item.Key.ToString());
+                sb.Append(",");
+                sb.Append(item.Value.ToString());
+                sb.Append("}");
+                if (index != source.Count)
                 {
                     sb.Append(",");
                 }
+                index++;
             }
-            sb.Append("]");
+            sb.Append("}");
             return sb.ToString();
         }
     }

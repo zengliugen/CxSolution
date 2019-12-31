@@ -5,7 +5,7 @@ using System.Net.Sockets;
 using System.Threading;
 
 using CxSolution.CxRouRou.Collections;
-using CxSolution.CxRouRou.Expand;
+using CxSolution.CxRouRou.Expands;
 using CxSolution.CxRouRou.Util;
 
 namespace CxSolution.CxRouRou.Net.Sockets.Tcp

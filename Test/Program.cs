@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-using CxSolution.CxRouRou.Expand;
+using CxSolution.CxRouRou.Expands;
 using CxSolution.CxRouRou.Security;
 
 namespace CxSolution.Test
