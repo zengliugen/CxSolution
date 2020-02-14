@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Reflection;
 
-using CxSolution.CxRouRou.Expands;
-using CxSolution.CxRouRou.Security;
+using CxSolution.CxRouRou.Reflection;
 
 namespace CxSolution.Test
 {
@@ -10,39 +10,22 @@ namespace CxSolution.Test
     {
         static void Main(string[] args)
         {
-            //Test();
-            var AESKey = CxAES.CreateAESKey();
-            Console.WriteLine(AESKey.Key.ToHexString());
-            Console.WriteLine(AESKey.IV.ToHexString());
+            var assembly = Assembly.Load("CxReflectionTest");
+            var p1 = assembly.GetType("CxSolution.CxReflectionTest.TestBase");
+            var p2 = p1.GetField("base_public_int");
+            var i1 = assembly.CreateInstance("CxSolution.CxReflectionTest.TestBase");
+            var p3 = p2.GetValue(i1);
+            Console.WriteLine(p3);
+            Debug.Write("------------------");
+            CxReflectionTest.TestBase.int_static = 50;
+            p2.SetValue(i1, 50);
+            var p4 = p2.GetValue(i1);
+            Console.WriteLine(p4);
 
+            CxReflectionTest.TestBase.int_static = 20;
+            var info = CxAssembly.GetAssemblyInfo(assembly);
+            Console.Write(info);
             Console.ReadKey();
-        }
-
-        public static void Test()
-        {
-            var testLength = 1024 * 1024 * 100;
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-            long ivalue = 1;
-            long icount = 0;
-            for (int i = 0; i < testLength; i++)
-            {
-                icount += ivalue;
-                icount -= ivalue;
-            }
-            stopwatch.Stop();
-            Console.WriteLine("test 1:" + stopwatch.ElapsedTicks);
-
-            stopwatch.Restart();
-            int svalue = 1;
-            int scount = 0;
-            for (int i = 0; i < testLength; i++)
-            {
-                scount += svalue;
-                scount -= svalue;
-            }
-            stopwatch.Stop();
-            Console.WriteLine("test 2:" + stopwatch.ElapsedTicks);
         }
     }
 }

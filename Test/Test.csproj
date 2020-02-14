@@ -50,6 +50,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CxReflectionTest\CxReflectionTest.csproj">
+      <Project>{72906499-e0f1-4dd3-8f2d-ce036f85df13}</Project>
+      <Name>CxReflectionTest</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CxRouRou\CxRouRou.csproj">
       <Project>{73685e29-c961-4d81-985e-66070fc03f1c}</Project>
       <Name>CxRouRou</Name>
