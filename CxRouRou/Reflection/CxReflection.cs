@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
-using Throw = CxSolution.CxRouRou.Util.CxThrow;
+using CxSolution.CxRouRou.Exceptions;
 
 namespace CxSolution.CxRouRou.Reflection
 {
@@ -22,7 +22,10 @@ namespace CxSolution.CxRouRou.Reflection
         /// <returns></returns>
         public static Assembly GetAssembly(string assemblyName)
         {
-            Throw.ArgumentNullOrEmptyException(string.IsNullOrEmpty(assemblyName), "assemblyName");
+            if (string.IsNullOrEmpty(assemblyName))
+            {
+                throw new ArgumentNullOrEmptyException("assemblyName");
+            }
             var assembly = Assembly.Load(assemblyName);
             return assembly;
         }
@@ -36,9 +39,18 @@ namespace CxSolution.CxRouRou.Reflection
         /// <returns></returns>
         public static PropertyInfo GetPropertyInfo(Assembly assembly, string typeFullName, string propertyName, BindingFlags bindingFlags = DefaultBindingFlag)
         {
-            Throw.ArgumentNullException(assembly == null, "assembly");
-            Throw.ArgumentNullOrEmptyException(string.IsNullOrEmpty(typeFullName), "typeFullName");
-            Throw.ArgumentNullOrEmptyException(string.IsNullOrEmpty(propertyName), "propertyName");
+            if (assembly == null)
+            {
+                throw new ArgumentNullException("assembly");
+            }
+            if (string.IsNullOrEmpty(typeFullName))
+            {
+                throw new ArgumentNullOrEmptyException("typeFullName");
+            }
+            if (string.IsNullOrEmpty(propertyName))
+            {
+                throw new ArgumentNullOrEmptyException("propertyName");
+            }
             var type = assembly.GetType(typeFullName, false);
             if (type == null) return null;
             var propertyInfo = type.GetProperty(propertyName, bindingFlags);
@@ -54,9 +66,18 @@ namespace CxSolution.CxRouRou.Reflection
         /// <returns></returns>
         public static PropertyInfo GetPropertyInfo(string assemblyName, string typeFullName, string propertyName, BindingFlags bindingFlags = DefaultBindingFlag)
         {
-            Throw.ArgumentNullException(string.IsNullOrEmpty(assemblyName), "assemblyName");
-            Throw.ArgumentNullOrEmptyException(string.IsNullOrEmpty(typeFullName), "typeFullName");
-            Throw.ArgumentNullOrEmptyException(string.IsNullOrEmpty(propertyName), "propertyName");
+            if (string.IsNullOrEmpty(assemblyName))
+            {
+                throw new ArgumentNullException("assemblyName");
+            }
+            if (string.IsNullOrEmpty(typeFullName))
+            {
+                throw new ArgumentNullException("typeFullName");
+            }
+            if (string.IsNullOrEmpty(propertyName))
+            {
+                throw new ArgumentNullException("propertyName");
+            }
             var assembly = GetAssembly(assemblyName);
             if (assembly == null) return null;
             var type = assembly.GetType(typeFullName, false);
@@ -136,9 +157,18 @@ namespace CxSolution.CxRouRou.Reflection
         /// <returns></returns>
         public static FieldInfo GetFieldInfo(Assembly assembly, string typeFullName, string fieldName, BindingFlags bindingFlags = DefaultBindingFlag)
         {
-            Throw.ArgumentNullException(assembly == null, "assembly");
-            Throw.ArgumentNullOrEmptyException(string.IsNullOrEmpty(typeFullName), "typeFullName");
-            Throw.ArgumentNullOrEmptyException(string.IsNullOrEmpty(fieldName), "fieldName");
+            if (assembly == null)
+            {
+                throw new ArgumentNullException("assembly");
+            }
+            if (string.IsNullOrEmpty(typeFullName))
+            {
+                throw new ArgumentNullException("typeFullName");
+            }
+            if (string.IsNullOrEmpty(fieldName))
+            {
+                throw new ArgumentNullException("fieldName");
+            }
             var type = assembly.GetType(typeFullName, false);
             if (type == null) return null;
             var fieldInfo = type.GetField(fieldName, bindingFlags);
@@ -154,9 +184,18 @@ namespace CxSolution.CxRouRou.Reflection
         /// <returns></returns>
         public static FieldInfo GetFieldInfo(string assemblyName, string typeFullName, string fieldName, BindingFlags bindingFlags = DefaultBindingFlag)
         {
-            Throw.ArgumentNullOrEmptyException(string.IsNullOrEmpty(assemblyName), "assemblyName");
-            Throw.ArgumentNullOrEmptyException(string.IsNullOrEmpty(typeFullName), "typeFullName");
-            Throw.ArgumentNullOrEmptyException(string.IsNullOrEmpty(fieldName), "fieldName");
+            if (string.IsNullOrEmpty(assemblyName))
+            {
+                throw new ArgumentNullException("assemblyName");
+            }
+            if (string.IsNullOrEmpty(typeFullName))
+            {
+                throw new ArgumentNullException("typeFullName");
+            }
+            if (string.IsNullOrEmpty(fieldName))
+            {
+                throw new ArgumentNullException("fieldName");
+            }
             var assembly = GetAssembly(assemblyName);
             if (assembly == null) return null;
             var type = assembly.GetType(typeFullName, false);
@@ -236,9 +275,18 @@ namespace CxSolution.CxRouRou.Reflection
         /// <returns></returns>
         public static EventInfo GetEventInfo(Assembly assembly, string typeFullName, string eventName, BindingFlags bindingFlags = DefaultBindingFlag)
         {
-            Throw.ArgumentNullException(assembly == null, "assembly");
-            Throw.ArgumentNullOrEmptyException(string.IsNullOrEmpty(typeFullName), "typeFullName");
-            Throw.ArgumentNullOrEmptyException(string.IsNullOrEmpty(eventName), "eventName");
+            if (assembly == null)
+            {
+                throw new ArgumentNullException("assembly");
+            }
+            if (string.IsNullOrEmpty(typeFullName))
+            {
+                throw new ArgumentNullOrEmptyException("typeFullName");
+            }
+            if (string.IsNullOrEmpty(eventName))
+            {
+                throw new ArgumentNullOrEmptyException("eventName");
+            }
             var type = assembly.GetType(typeFullName, false);
             if (type == null) return null;
             var eventInfo = type.GetEvent(eventName, bindingFlags);
@@ -254,9 +302,18 @@ namespace CxSolution.CxRouRou.Reflection
         /// <returns></returns>
         public static EventInfo GetEventInfo(string assemblyName, string typeFullName, string eventName, BindingFlags bindingFlags = DefaultBindingFlag)
         {
-            Throw.ArgumentNullOrEmptyException(string.IsNullOrEmpty(assemblyName), "assemblyName");
-            Throw.ArgumentNullOrEmptyException(string.IsNullOrEmpty(typeFullName), "typeFullName");
-            Throw.ArgumentNullOrEmptyException(string.IsNullOrEmpty(eventName), "eventName");
+            if (string.IsNullOrEmpty(assemblyName))
+            {
+                throw new ArgumentNullOrEmptyException("assemblyName");
+            }
+            if (string.IsNullOrEmpty(typeFullName))
+            {
+                throw new ArgumentNullOrEmptyException("typeFullName");
+            }
+            if (string.IsNullOrEmpty(eventName))
+            {
+                throw new ArgumentNullOrEmptyException("eventName");
+            }
             var assembly = GetAssembly(assemblyName);
             if (assembly == null) return null;
             var type = assembly.GetType(typeFullName, false);
@@ -337,9 +394,18 @@ namespace CxSolution.CxRouRou.Reflection
         /// <returns></returns>
         public static MethodInfo GetMethodInfo(Assembly assembly, string typeFullName, string methodName, BindingFlags bindingFlags = DefaultBindingFlag, Binder binder = null, Type[] types = null, ParameterModifier[] parameterModifiers = null)
         {
-            Throw.ArgumentNullOrEmptyException(assembly == null, "assembly");
-            Throw.ArgumentNullOrEmptyException(string.IsNullOrEmpty(typeFullName), "typeFullName");
-            Throw.ArgumentNullOrEmptyException(string.IsNullOrEmpty(methodName), "methodName");
+            if (assembly == null)
+            {
+                throw new ArgumentNullOrEmptyException("assembly");
+            }
+            if (string.IsNullOrEmpty(typeFullName))
+            {
+                throw new ArgumentNullOrEmptyException("typeFullName");
+            }
+            if (string.IsNullOrEmpty(methodName))
+            {
+                throw new ArgumentNullOrEmptyException("methodName");
+            }
             var type = assembly.GetType(typeFullName, false);
             if (type == null) return null;
             MethodInfo methodInfo = null;
@@ -362,9 +428,18 @@ namespace CxSolution.CxRouRou.Reflection
         /// <returns></returns>
         public static MethodInfo GetMethodInfo(string assemblyName, string typeFullName, string methodName, BindingFlags bindingFlags = DefaultBindingFlag, Binder binder = null, Type[] types = null, ParameterModifier[] parameterModifiers = null)
         {
-            Throw.ArgumentNullOrEmptyException(string.IsNullOrEmpty(assemblyName), "assemblyName");
-            Throw.ArgumentNullOrEmptyException(string.IsNullOrEmpty(typeFullName), "typeFullName");
-            Throw.ArgumentNullOrEmptyException(string.IsNullOrEmpty(methodName), "methodName");
+            if (string.IsNullOrEmpty(assemblyName))
+            {
+                throw new ArgumentNullOrEmptyException("assemblyName");
+            }
+            if (string.IsNullOrEmpty(typeFullName))
+            {
+                throw new ArgumentNullOrEmptyException("typeFullName");
+            }
+            if (string.IsNullOrEmpty(methodName))
+            {
+                throw new ArgumentNullOrEmptyException("methodName");
+            }
             var assembly = GetAssembly(assemblyName);
             if (assembly == null) return null;
             var type = assembly.GetType(typeFullName, false);

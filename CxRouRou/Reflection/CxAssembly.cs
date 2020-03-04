@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
-
+using CxSolution.CxRouRou.Exceptions;
 using CxSolution.CxRouRou.Expands;
-
-using Throw = CxSolution.CxRouRou.Util.CxThrow;
 
 namespace CxSolution.CxRouRou.Reflection
 {
@@ -25,7 +23,10 @@ namespace CxSolution.CxRouRou.Reflection
         /// <returns></returns>
         public static Assembly GetAssembly(string assemblyName)
         {
-            Throw.ArgumentNullOrEmptyException(string.IsNullOrEmpty(assemblyName), "assemblyName");
+            if (string.IsNullOrEmpty(assemblyName))
+            {
+                throw new ArgumentNullOrEmptyException("assemblyName");
+            }
             var assembly = Assembly.Load(assemblyName);
             return assembly;
         }
