@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 
 namespace CxSolution.CxRouRou.Net
 {
@@ -12,13 +13,13 @@ namespace CxSolution.CxRouRou.Net
         /// </summary>
         private static Regex IPRegex = new Regex(@"^((2[0-4]\d|25[0-5]|[01]?\d\d?)\.){3}(2[0-4]\d|25[0-5]|[01]?\d\d?)$");
         /// <summary>
-        /// 检测字符串是否为IP
+        /// 检测字符串是否为IPV4
         /// </summary>
-        /// <param name="ip"></param>
+        /// <param name="ipv4"></param>
         /// <returns></returns>
-        public static bool IsIP(string ip)
+        public static bool IsIPV4(string ipv4)
         {
-            return IPRegex.IsMatch(ip);
+            return IPRegex.IsMatch(ipv4);
         }
     }
 }

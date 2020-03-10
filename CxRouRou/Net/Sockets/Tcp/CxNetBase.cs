@@ -383,9 +383,8 @@ namespace CxSolution.CxRouRou.Net.Sockets.Tcp
         private IPAddress[] GetIPAddress(string host, ushort port, IComparer<IPAddress> comparer = null)
         {
             var iPAddressList = new List<IPAddress>();
-            if (CxNetTool.IsIP(host))
+            if (IPAddress.TryParse(host, out IPAddress iPAddress))
             {
-                IPAddress.TryParse(host, out IPAddress iPAddress);
                 iPAddressList.Add(iPAddress);
             }
             else
