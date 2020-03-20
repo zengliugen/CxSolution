@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CxSolution.CxRouRou.Collections;
+using CxSolution.CxRouRou.Expands;
 
 namespace CxSolution.CxRouRou.Net.Downloads
 {
@@ -21,9 +22,9 @@ namespace CxSolution.CxRouRou.Net.Downloads
         /// </summary>
         public static readonly TimeSpan DefTimeOut = new TimeSpan(10000000 * 20);
         /// <summary>
-        /// 处理间隔时间(毫秒)
+        /// 处理间隔时间(毫秒)用于控制多久进行一次断点续传记录与进度函数调用
         /// </summary>
-        public static int HandlerSpaceTime = 200;
+        public static int HandlerSpaceTime = 500;
         /// <summary>
         /// 缓冲区大小
         /// </summary>
@@ -37,7 +38,7 @@ namespace CxSolution.CxRouRou.Net.Downloads
         /// </summary>
         public Action<CxDownloadData> ProgressAction;
         /// <summary>
-        /// 完成函数
+        /// 完成函数 是否发生错误
         /// </summary>
         public Action<bool, CxDownloadData> CompleteAction;
         /// <summary>
@@ -85,17 +86,23 @@ namespace CxSolution.CxRouRou.Net.Downloads
         /// <summary>
         /// 开始
         /// </summary>
-        public override int Start()
+        public override bool Start()
         {
             if (State == EDownloadState.Downloading)
             {
                 //任务已在下载中
-                return __ErrorCode.Success;
+                return false;
             }
             else if (State == EDownloadState.Complete)
             {
                 //任务已经下载完成
-                return __ErrorCode.Success;
+                return false;
+            }
+            else if (State == EDownloadState.Error)
+            {
+
+                //任务发生了错误,不再继续下载,如需要继续下载,请先调用ClearError后再调用该接口
+                return false;
             }
             //取消标记来源(相当于控制器)
             cancellationTokenSource = new CancellationTokenSource();
@@ -105,31 +112,24 @@ namespace CxSolution.CxRouRou.Net.Downloads
             downloadTask = Task.Factory.StartNew(DownloadHandler, cancellationToken, cancellationToken);
             //设置状态为下载中
             State = EDownloadState.Downloading;
-            //计算已下载进度
-            Progress = 1f * DownloadedSize / FileSize;
-            DownloadSpeed = 0;
-            //调用一次进度函数
             ProgressAction?.Invoke(GetDownloadData());
-            return __ErrorCode.Success;
+            return true;
         }
         /// <summary>
         /// 停止
         /// </summary>
-        public override int Stop()
+        public override bool Stop()
         {
             if (State != EDownloadState.Downloading)
             {
                 //任务未处于下载中,无法停止
-                return __ErrorCode.Success;
+                return false;
             }
             cancellationTokenSource.Cancel();
             State = EDownloadState.Stop;
-            //计算已下载进度
-            Progress = 1f * DownloadedSize / FileSize;
-            DownloadSpeed = 0;
             //调用一次进度函数
             ProgressAction?.Invoke(GetDownloadData());
-            return __ErrorCode.Success;
+            return true;
         }
         /// <summary>
         /// 下载处理函数
@@ -197,9 +197,6 @@ namespace CxSolution.CxRouRou.Net.Downloads
                     DownloadedSize = httpDownloadInfo.DownloadedSize;
                     //保存内容长度到文件大小
                     FileSize = contentLength;
-                    //计算已下载进度
-                    Progress = 1f * DownloadedSize / FileSize;
-                    DownloadSpeed = 0;
                     //调用一次进度函数
                     ProgressAction?.Invoke(GetDownloadData());
                     //更新已下载信息
@@ -209,11 +206,11 @@ namespace CxSolution.CxRouRou.Net.Downloads
                     //获取Http内容流任务
                     using (var httpContentStreamTask = HttpClientHandler.GetStreamAsync(Url))
                     {
-                        ////等待加载完成
-                        //while (!httpContentStreamTask.IsCompleted)
-                        //{
-                        //    cancellationToken.ThrowIfCancellationRequested();
-                        //}
+                        //等待加载完成
+                        while (!httpContentStreamTask.IsCompleted)
+                        {
+                            cancellationToken.ThrowIfCancellationRequested();
+                        }
                         //检测并创建保存路径的文件夹
                         var dir = Path.GetDirectoryName(SavePath);
                         if (!Directory.Exists(dir))
@@ -234,10 +231,8 @@ namespace CxSolution.CxRouRou.Net.Downloads
                             //初始化缓冲区
                             var buffer = BufferPool.Pop();
                             var readLength = 0;
-                            //计时器(计算下载速度)
+                            //计时器(控制写入磁盘速度)
                             var speedStopwatch = Stopwatch.StartNew();
-                            //下载大小(计算下载速度)
-                            var speedDownloadSize = 0L;
                             //获取Http内容流
                             using (var httpContentStream = httpContentStreamTask.Result)
                             {
@@ -250,15 +245,9 @@ namespace CxSolution.CxRouRou.Net.Downloads
                                     localFileStream.Write(buffer, 0, readLength);
                                     //统计已下载内容
                                     DownloadedSize += readLength;
-                                    speedDownloadSize += readLength;
-                                    //计算已下载进度
-                                    Progress = 1f * DownloadedSize / FileSize;
                                     //指定间隔进行一次以下操作
                                     if (speedStopwatch.ElapsedMilliseconds > HandlerSpaceTime)
                                     {
-                                        //计算下载速度
-                                        DownloadSpeed = speedDownloadSize * 1000 / speedStopwatch.ElapsedMilliseconds;
-                                        speedDownloadSize = 0;
                                         speedStopwatch.Restart();
                                         //调用一次进度函数
                                         ProgressAction?.Invoke(GetDownloadData());
@@ -269,9 +258,6 @@ namespace CxSolution.CxRouRou.Net.Downloads
                                     //判断是否取消了任务
                                     cancellationToken.ThrowIfCancellationRequested();
                                 }
-                                //计算已下载进度
-                                Progress = 1f * DownloadedSize / FileSize;
-                                DownloadSpeed = 0;
                                 //删除已下载信息
                                 File.Delete(httpDownloadInfoFile);
                                 //下载完成
@@ -284,8 +270,6 @@ namespace CxSolution.CxRouRou.Net.Downloads
             catch (OperationCanceledException)
             {
                 //该异常为取消任务所导致,不进行任何处理
-                Progress = 1f * DownloadedSize / FileSize;
-                DownloadSpeed = 0;
                 //调用一次进度函数
                 ProgressAction?.Invoke(GetDownloadData());
             }
@@ -294,13 +278,13 @@ namespace CxSolution.CxRouRou.Net.Downloads
                 var sb = new StringBuilder();
                 foreach (var innerException in ae.InnerExceptions)
                 {
-                    sb.AppendLine(innerException.Message);
+                    sb.AppendLine(CxString.Format("Message:{0}\nStackTrace:{1}", innerException.Message, innerException.StackTrace));
                 }
                 DownloadError(sb.ToString());
             }
             catch (Exception e)
             {
-                DownloadError(e.Message);
+                DownloadError(CxString.Format("Message:{0}\nStackTrace:{1}", e.Message, e.StackTrace));
             }
         }
         /// <summary>
@@ -310,8 +294,10 @@ namespace CxSolution.CxRouRou.Net.Downloads
         {
             //修改状态为完成
             State = EDownloadState.Complete;
+            //调用一次进度函数
+            ProgressAction?.Invoke(GetDownloadData());
             //调用一次完成函数
-            CompleteAction?.Invoke(true, GetDownloadData());
+            CompleteAction?.Invoke(false, GetDownloadData());
         }
         /// <summary>
         /// 下载错误
@@ -321,10 +307,10 @@ namespace CxSolution.CxRouRou.Net.Downloads
         {
             ErrorMsg = errorMsg;
             State = EDownloadState.Error;
-            Progress = 1f * DownloadedSize / FileSize;
-            DownloadSpeed = 0;
+            //调用一次进度函数
+            ProgressAction?.Invoke(GetDownloadData());
             //调用一次完成函数
-            CompleteAction?.Invoke(false, GetDownloadData());
+            CompleteAction?.Invoke(true, GetDownloadData());
         }
     }
 }

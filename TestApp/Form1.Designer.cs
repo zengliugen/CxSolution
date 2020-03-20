@@ -34,6 +34,7 @@
             this.button2 = new System.Windows.Forms.Button();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.label2 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // label1
@@ -88,11 +89,24 @@
             this.label2.TabIndex = 4;
             this.label2.Text = "label2";
             // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(80, 176);
+            this.label3.MaximumSize = new System.Drawing.Size(700, 0);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(695, 36);
+            this.label3.TabIndex = 5;
+            this.label3.Text = "label3111111111111111111111111111111111111111111111111111111111111111111111111111" +
+    "11111111111111111111111111111111111111111111111111111111111111111111111111111111" +
+    "1111111111111\r\nqweqweqwe";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.button2);
@@ -114,6 +128,7 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label3;
     }
 }
 

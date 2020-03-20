@@ -9,56 +9,115 @@ namespace CxSolution.CxRouRou.Net.Downloads
     /// <summary>
     /// 任务
     /// </summary>
-    public abstract class CxDwonloadBase : IDownloadData, IDisposable
+    public abstract class CxDwonloadBase : IDisposable
     {
+        /// <summary>
+        /// 下载数据
+        /// </summary>
+        protected readonly CxDownloadData _downloadData;
+        /// <summary>
+        /// 异步锁
+        /// </summary>
+        private readonly object _syncLock = new object();
         /// <summary>
         /// 状态
         /// </summary>
-        public EDownloadState State { get; internal set; }
-        /// <summary>
-        /// 地址
-        /// </summary>
-        public string Url { get; internal set; }
-        /// <summary>
-        /// 保存路径
-        /// </summary>
-        public string SavePath { get; internal set; }
-        /// <summary>
-        /// 已下载大小
-        /// </summary>
-        public long DownloadedSize { get; internal set; }
-        private float _progress;
-        /// <summary>
-        /// 下载进度
-        /// </summary>
-        public float Progress
+        protected EDownloadState State
         {
             get
             {
-                return _progress;
-            }
-            internal set
-            {
-                if (float.IsNaN(value))
+                lock (_syncLock)
                 {
-                    value = 0;
+                    return _downloadData.State;
                 }
-                _progress = value;
+            }
+            set
+            {
+                lock (_syncLock)
+                {
+                    _downloadData.State = value;
+                }
+            }
+        }
+        /// <summary>
+        /// 地址
+        /// </summary>
+        protected string Url
+        {
+            get
+            {
+                lock (_syncLock)
+                {
+                    return _downloadData.Url;
+                }
+            }
+        }
+        /// <summary>
+        /// 保存路径
+        /// </summary>
+        protected string SavePath
+        {
+            get
+            {
+                lock (_syncLock)
+                {
+                    return _downloadData.SavePath;
+                }
+            }
+        }
+        /// <summary>
+        /// 已下载大小
+        /// </summary>
+        protected long DownloadedSize
+        {
+            get
+            {
+                lock (_syncLock)
+                {
+                    return _downloadData.DownloadedSize;
+                }
+            }
+            set
+            {
+                lock (_syncLock)
+                {
+                    _downloadData.DownloadedSize = value;
+                }
+            }
+        }
+        /// <summary>
+        /// 错误信息
+        /// </summary>
+        protected string ErrorMsg
+        {
+            set
+            {
+                lock (_syncLock)
+                {
+                    _downloadData.ErrorMsg = value;
+                }
             }
         }
         /// <summary>
         /// 文件大小
         /// </summary>
-        public long FileSize { get; internal set; }
-        /// <summary>
-        /// 下载速度
-        /// </summary>
-        public long DownloadSpeed { get; internal set; }
-        /// <summary>
-        /// 错误信息
-        /// </summary>
-        public string ErrorMsg { get; internal set; }
-
+        protected long FileSize
+        {
+            get
+            {
+                lock (_syncLock)
+                {
+                    return _downloadData.FileSize;
+                }
+            }
+            set
+            {
+                lock (_syncLock)
+                {
+                    _downloadData.FileSize = value;
+                }
+            }
+        }
         /// <summary>
         /// 初始化
         /// </summary>
@@ -66,9 +125,16 @@ namespace CxSolution.CxRouRou.Net.Downloads
         /// <param name="savePatch"></param>
         public CxDwonloadBase(string url, string savePatch)
         {
-            State = EDownloadState.Ready;
-            Url = url ?? throw new ArgumentNullException(nameof(url));
-            SavePath = savePatch ?? throw new ArgumentNullException(nameof(savePatch));
+            _downloadData = new CxDownloadData
+            {
+                State = EDownloadState.Ready,
+                Url = url ?? throw new ArgumentNullException(nameof(url)),
+                SavePath = savePatch ?? throw new ArgumentNullException(nameof(savePatch)),
+                DownloadedSize = 0,
+                FileSize = 0,
+                ErrorMsg = null,
+                DownloadSpeed = 0,
+            };
         }
         /// <summary>
         /// 释放
@@ -77,18 +143,47 @@ namespace CxSolution.CxRouRou.Net.Downloads
         /// <summary>
         /// 开始
         /// </summary>
-        public abstract int Start();
+        public abstract bool Start();
         /// <summary>
         /// 停止
         /// </summary>
-        public abstract int Stop();
+        public abstract bool Stop();
+        /// <summary>
+        /// 清除错误 将任务状态设置为停止
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool ClearError()
+        {
+            if (State != EDownloadState.Error)
+            {
+                //未发生错误
+                return false;
+            }
+            State = EDownloadState.Stop;
+            ErrorMsg = "";
+            return true;
+        }
         /// <summary>
         /// 获取下载数据
         /// </summary>
         /// <returns></returns>
         public virtual CxDownloadData GetDownloadData()
         {
-            return new CxDownloadData(this);
+            lock (_syncLock)
+            {
+                return new CxDownloadData(_downloadData);
+            }
+        }
+        /// <summary>
+        /// 设置下载数据到参数
+        /// </summary>
+        /// <param name="downloadData"></param>
+        public virtual void SetDownloadDataTo(CxDownloadData downloadData)
+        {
+            lock (_syncLock)
+            {
+                downloadData?.UpdateValue(_downloadData);
+            }
         }
     }
 }

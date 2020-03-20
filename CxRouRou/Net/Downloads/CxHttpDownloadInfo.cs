@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using CxSolution.CxRouRou.Exceptions;
+using CxSolution.CxRouRou.Util;
 
 namespace CxSolution.CxRouRou.Net.Downloads
 {
@@ -47,22 +48,29 @@ namespace CxSolution.CxRouRou.Net.Downloads
                 return new CxHttpDownloadInfo();
             }
             CxHttpDownloadInfo httpDownloadInfo = new CxHttpDownloadInfo();
-            using (var fileStream = File.OpenRead(file))
+            try
             {
-                if (fileStream.Length > 4)
+                using (var fileStream = File.OpenRead(file))
                 {
-                    using (var binaryReader = new BinaryReader(fileStream))
+                    if (fileStream.Length > 4)
                     {
-                        var _MageFlag = binaryReader.ReadUInt32();
-                        if (_MageFlag == MageFlag)
+                        using (var binaryReader = new BinaryReader(fileStream))
                         {
-                            httpDownloadInfo.ETAG = binaryReader.ReadString();
-                            httpDownloadInfo.LastModified = binaryReader.ReadString();
-                            httpDownloadInfo.DownloadedSize = binaryReader.ReadInt64();
-                            httpDownloadInfo.ContentLength = binaryReader.ReadInt64();
+                            var _MageFlag = binaryReader.ReadUInt32();
+                            if (_MageFlag == MageFlag)
+                            {
+                                httpDownloadInfo.ETAG = binaryReader.ReadString();
+                                httpDownloadInfo.LastModified = binaryReader.ReadString();
+                                httpDownloadInfo.DownloadedSize = binaryReader.ReadInt64();
+                                httpDownloadInfo.ContentLength = binaryReader.ReadInt64();
+                            }
                         }
                     }
                 }
+            }
+            catch (Exception e)
+            {
+                CxDebug.WriteLine("CxHttpDownloadInfo LoadFromFile Error:{0}", e.Message);
             }
             return httpDownloadInfo;
         }
@@ -87,17 +95,24 @@ namespace CxSolution.CxRouRou.Net.Downloads
             {
                 Directory.CreateDirectory(dir);
             }
-            using (var fileStream = File.OpenWrite(file))
+            try
             {
-                using (var binaryWriter = new BinaryWriter(fileStream))
+                using (var fileStream = File.OpenWrite(file))
                 {
-                    binaryWriter.Seek(0, SeekOrigin.Begin);
-                    binaryWriter.Write(MageFlag);
-                    binaryWriter.Write(httpDownloadInfo.ETAG);
-                    binaryWriter.Write(httpDownloadInfo.LastModified);
-                    binaryWriter.Write(httpDownloadInfo.DownloadedSize);
-                    binaryWriter.Write(httpDownloadInfo.ContentLength);
+                    using (var binaryWriter = new BinaryWriter(fileStream))
+                    {
+                        binaryWriter.Seek(0, SeekOrigin.Begin);
+                        binaryWriter.Write(MageFlag);
+                        binaryWriter.Write(httpDownloadInfo.ETAG);
+                        binaryWriter.Write(httpDownloadInfo.LastModified);
+                        binaryWriter.Write(httpDownloadInfo.DownloadedSize);
+                        binaryWriter.Write(httpDownloadInfo.ContentLength);
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                CxDebug.WriteLine("CxHttpDownloadInfo SaveToFile Error:{0}", e.Message);
             }
         }
     }

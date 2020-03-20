@@ -18,10 +18,6 @@ namespace CxSolution.CxRouRou.Net.Downloads
         /// </summary>
         Ready,
         /// <summary>
-        /// 等待开始
-        /// </summary>
-        WaitingStart,
-        /// <summary>
         /// 下载中
         /// </summary>
         Downloading,
@@ -63,14 +59,6 @@ namespace CxSolution.CxRouRou.Net.Downloads
         /// 文件大小
         /// </summary>
         long FileSize { get; }
-        /// <summary>
-        /// 进度值
-        /// </summary>
-        float Progress { get; }
-        /// <summary>
-        /// 下载速度
-        /// </summary>
-        long DownloadSpeed { get; }
         /// <summary>
         /// 错误信息
         /// </summary>
