@@ -10,7 +10,7 @@ using CxSolution.CxRouRou.Net.Sockets.Tcp;
 namespace CxSolution.CxRouRouTest.Net.Sockets.Tcp
 {
     /// <summary>
-    /// 网络测试
+    /// 网络测试(Tcp)
     /// </summary>
     public class CxNetTest : CxTestBase
     {
@@ -103,7 +103,7 @@ namespace CxSolution.CxRouRouTest.Net.Sockets.Tcp
                 }
                 if (sw.ElapsedMilliseconds > 20 * 1000)
                 {
-                    PrintL("测试超时，视为失败");
+                    PrintL("测试超时,视为失败");
                     break;
                 }
                 Thread.Sleep(1);

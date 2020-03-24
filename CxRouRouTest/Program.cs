@@ -10,10 +10,12 @@ namespace CxSolution.CxRouRouTest
             //byteBufferTest.Run();
             //Net.Sockets.Tcp.CxNetTest netTest = new Net.Sockets.Tcp.CxNetTest("CxNetTest");
             //netTest.Run();
+            Net.Sockets.Udp.CxNetTest netTest = new Net.Sockets.Udp.CxNetTest("CxNetTest");
+            netTest.Run();
             //Security.CxRSATest rsaTest = new CxRouRouTest.Security.CxRSATest("CxRSATest");
             //rsaTest.Run();
-            Security.CxAESTest aesTest = new Security.CxAESTest("CxAESTest");
-            aesTest.Run();
+            //Security.CxAESTest aesTest = new Security.CxAESTest("CxAESTest");
+            //aesTest.Run();
 
             Console.ReadKey();
         }

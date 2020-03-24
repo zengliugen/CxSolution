@@ -115,7 +115,7 @@ namespace CxSolution.CxRouRou.Net.Sockets.Tcp
         {
             lock (_syncLock)
             {
-                //此处使用的是循环列表中的对象，清空即可
+                //此处使用的是循环列表中的对象,清空即可
                 e.BufferList.Clear();
                 e.BufferList = null;
             }
@@ -184,7 +184,7 @@ namespace CxSolution.CxRouRou.Net.Sockets.Tcp
                 _sendSaea = null;
             }
             tempSendSaea.Completed -= SendCallBack;
-            //此时可能还未发送过消息，BufferList为空
+            //此时可能还未发送过消息,BufferList为空
             if (tempSendSaea.BufferList != null)
             {
                 tempSendSaea.BufferList.Clear();

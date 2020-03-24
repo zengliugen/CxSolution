@@ -37,7 +37,7 @@ namespace CxSolution.CxRouRou.Net.Sockets
             WritePos = FreeNum;
         }
         /// <summary>
-        /// 以指定数据创建，不复制源数据
+        /// 以指定数据创建,不复制源数据
         /// </summary>
         /// <param name="data"></param>
         public CxMsgPacket(byte[] data) : base(data)

@@ -98,7 +98,7 @@ namespace CxSolution.CxRouRou.Collections
             Capacity = capacity;
         }
         /// <summary>
-        /// 以指定数据创建，不复制源数据
+        /// 以指定数据创建,不复制源数据
         /// </summary>
         /// <param name="data"></param>
         public CxByteBuffer(byte[] data)
@@ -785,7 +785,7 @@ namespace CxSolution.CxRouRou.Collections
                             break;
                         //无法解析的基础类型
                         default:
-                            throw new Exception("自动压入失败，无法解析的基础类型");
+                            throw new Exception("自动压入失败,无法解析的基础类型");
                     }
                 }
                 //枚举类型
@@ -810,13 +810,13 @@ namespace CxSolution.CxRouRou.Collections
                 if (type.IsArray)
                 {
 #if !CHECK_LOOP_REFERENCE_OFF
-                    //保存标记，防止循环引用
+                    //保存标记,防止循环引用
                     flags.Add(obj, 1);
 #endif
                     if (obj is Array array)
                     {
                         Type elementType = type.GetElementType();
-                        //如果是byte数组，直接进行写入
+                        //如果是byte数组,直接进行写入
                         if (byteType.IsAssignableFrom(elementType))
                         {
                             Push((byte[])obj);
@@ -845,7 +845,7 @@ namespace CxSolution.CxRouRou.Collections
                 else if (IListType.IsAssignableFrom(type))
                 {
 #if !CHECK_LOOP_REFERENCE_OFF
-                    //保存标记，防止循环引用
+                    //保存标记,防止循环引用
                     flags.Add(obj, 1);
 #endif
                     if (obj is IList list)
@@ -866,7 +866,7 @@ namespace CxSolution.CxRouRou.Collections
                 else if (IDictionaryType.IsAssignableFrom(type))
                 {
 #if !CHECK_LOOP_REFERENCE_OFF
-                    //保存标记，防止循环引用
+                    //保存标记,防止循环引用
                     flags.Add(obj, 1);
 #endif
                     if (obj is IDictionary dictionary)
@@ -1024,7 +1024,7 @@ namespace CxSolution.CxRouRou.Collections
                             break;
                         //无法解析的基础类型
                         default:
-                            throw new Exception("自动压入失败，无法解析的基础类型");
+                            throw new Exception("自动压入失败,无法解析的基础类型");
                     }
                 }
                 //枚举类型

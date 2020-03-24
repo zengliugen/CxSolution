@@ -46,7 +46,7 @@ namespace CxSolution.CxRouRou.Collections
             _index = 0;
         }
         /// <summary>
-        /// 返回当前索引元素，并将索引指向下一个元素
+        /// 返回当前索引元素,并将索引指向下一个元素
         /// </summary>
         /// <returns></returns>
         public T Dequeue()

@@ -1,4 +1,8 @@
-﻿namespace CxSolution.CxRouRou.Net.Sockets.Tcp
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace CxSolution.CxRouRou.Net.Sockets.Udp
 {
     /// <summary>
     /// 网络配置
@@ -6,11 +10,7 @@
     public sealed class CxNetConfig
     {
         /// <summary>
-        /// 会话对象池大小 默认1000
-        /// </summary>
-        public int PoolSize { get; set; }
-        /// <summary>
-        /// 接收数据缓冲区大小 默认8196
+        /// 接收数据缓冲区大小 默认 8196
         /// </summary>
         public int ReceiveBufferSize { get; set; }
         /// <summary>

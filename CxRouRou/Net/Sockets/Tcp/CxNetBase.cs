@@ -25,7 +25,7 @@ namespace CxSolution.CxRouRou.Net.Sockets.Tcp
         BeClose,
     }
     /// <summary>
-    /// 网络基类
+    /// 网络基类(Tcp)
     /// </summary>
     public abstract class CxNetBase
     {
@@ -58,7 +58,7 @@ namespace CxSolution.CxRouRou.Net.Sockets.Tcp
         /// </summary>
         protected CxNetBase()
         {
-            _netConfig = new CxNetConfig { PoolSize = 1000, ReceiveBufferSize = 8196, ReceiveTimeout = 20000, SendBufferSize = 1400, SendTimeout = 20000, ListenIPv6 = false };
+            _netConfig = new CxNetConfig { PoolSize = 1000, ReceiveBufferSize = 8196, ReceiveTimeout = 5000, SendBufferSize = 1400, SendTimeout = 5000, ListenIPv6 = false };
         }
         /// <summary>
         /// 设置网络配置
@@ -69,11 +69,11 @@ namespace CxSolution.CxRouRou.Net.Sockets.Tcp
         /// <param name="sendBufferSize"></param>
         /// <param name="sendTimeout"></param>
         /// <param name="listenIPv6"></param>
-        public virtual void SetNetConfig(int poolSize = 1000, int receiveBufferSize = 8196, int receiveTimeout = 20000, int sendBufferSize = 1400, int sendTimeout = 20000, bool listenIPv6 = false)
+        public virtual void SetNetConfig(int poolSize = 1000, int receiveBufferSize = 8196, int receiveTimeout = 5000, int sendBufferSize = 1400, int sendTimeout = 5000, bool listenIPv6 = false)
         {
-            if (_isIntFlag == 0)
+            if (_isIntFlag != 0)
             {
-                throw new MethodAccessException("设置网络配置无效，应在启动服务或连接服务器之前调用");
+                throw new MethodAccessException("设置网络配置无效,应在启动服务或连接服务器之前调用");
             }
             _netConfig.PoolSize = poolSize;
             _netConfig.ReceiveBufferSize = receiveBufferSize;
@@ -361,45 +361,24 @@ namespace CxSolution.CxRouRou.Net.Sockets.Tcp
         public void StartConnect(string host, ushort port, IComparer<IPAddress> comparer = null)
         {
             Init();
-            var ipAddressArray = GetIPAddress(host, port, comparer);
+            var ipAddressArray = CxNetTool.GetIPAddress(host, port, comparer);
             if (ipAddressArray != null && ipAddressArray.Length > 0)
             {
                 var ipAddress = ipAddressArray[0];
-                var iPEndPoint = new IPEndPoint(ipAddress, port);
-                StartConnect(iPEndPoint, ipAddress.AddressFamily);
+                var ipEndPoint = new IPEndPoint(ipAddress, port);
+                if (ipAddress.AddressFamily == AddressFamily.InterNetwork || ipAddress.AddressFamily == AddressFamily.InterNetworkV6)
+                {
+                    StartConnect(ipEndPoint, ipAddress.AddressFamily);
+                }
+                else
+                {
+                    OnConnetFail(host, CxString.Format("不支持的网络类型 AddressFamily:{0}", ipAddress.AddressFamily.ToString()));
+                }
             }
             else
             {
                 OnConnetFail(host, "无法解析的地址");
             }
-        }
-        /// <summary>
-        /// 获取指定域名或者ip字符串的IP地址信息
-        /// </summary>
-        /// <param name="host"></param>
-        /// <param name="port"></param>
-        /// <param name="comparer">排序方法</param>
-        /// <returns></returns>
-        private IPAddress[] GetIPAddress(string host, ushort port, IComparer<IPAddress> comparer = null)
-        {
-            var iPAddressList = new List<IPAddress>();
-            if (IPAddress.TryParse(host, out IPAddress iPAddress))
-            {
-                iPAddressList.Add(iPAddress);
-            }
-            else
-            {
-                var hostEntry = Dns.GetHostEntry(host);
-                if (hostEntry != null)
-                {
-                    iPAddressList.AddRange(hostEntry.AddressList);
-                }
-            }
-            if (comparer != null)
-            {
-                iPAddressList.Sort(comparer);
-            }
-            return iPAddressList.ToArray();
         }
         /// <summary>
         /// 连接
@@ -521,7 +500,7 @@ namespace CxSolution.CxRouRou.Net.Sockets.Tcp
                 }
                 else
                 {
-                    // 如果从读取操作返回零，则远程端已关闭连接。
+                    // 如果从读取操作返回零,则远程端已关闭连接。
                 }
 
             }

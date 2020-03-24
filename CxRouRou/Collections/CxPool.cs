@@ -86,7 +86,7 @@ namespace CxSolution.CxRouRou.Collections
             }
             if (_reset != null)
             {
-                //重置对象，以便下次使用
+                //重置对象,以便下次使用
                 _reset.Invoke(t);
             }
             _pool.Enqueue(t);
