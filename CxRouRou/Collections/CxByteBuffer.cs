@@ -103,7 +103,7 @@ namespace CxSolution.CxRouRou.Collections
         /// <param name="data"></param>
         public CxByteBuffer(byte[] data)
         {
-            Data = data ?? throw new ArgumentNullException();
+            Data = data ?? throw new ArgumentNullException(nameof(data));
             WritePos = data.Length;
         }
         /// <summary>
@@ -189,7 +189,7 @@ namespace CxSolution.CxRouRou.Collections
         {
             if (data == null)
             {
-                throw new ArgumentNullException();
+                throw new ArgumentNullException(nameof(data));
             }
             if (index < 0 || length < 0 || index + length < data.Length)
             {
@@ -974,7 +974,7 @@ namespace CxSolution.CxRouRou.Collections
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type", "参数不可为空");
+                throw new ArgumentNullException(nameof(type));
             }
             object obj = null;
             TypeInfo typeInfo = type as TypeInfo;

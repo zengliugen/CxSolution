@@ -41,15 +41,15 @@ namespace CxSolution.CxRouRou.Reflection
         {
             if (assembly == null)
             {
-                throw new ArgumentNullException("assembly");
+                throw new ArgumentNullException(nameof(assembly));
             }
             if (string.IsNullOrEmpty(typeFullName))
             {
-                throw new ArgumentNullOrEmptyException("typeFullName");
+                throw new ArgumentNullOrEmptyException(nameof(typeFullName));
             }
             if (string.IsNullOrEmpty(propertyName))
             {
-                throw new ArgumentNullOrEmptyException("propertyName");
+                throw new ArgumentNullOrEmptyException(nameof(propertyName));
             }
             var type = assembly.GetType(typeFullName, false);
             if (type == null) return null;
@@ -68,15 +68,15 @@ namespace CxSolution.CxRouRou.Reflection
         {
             if (string.IsNullOrEmpty(assemblyName))
             {
-                throw new ArgumentNullException("assemblyName");
+                throw new ArgumentNullException(nameof(assemblyName));
             }
             if (string.IsNullOrEmpty(typeFullName))
             {
-                throw new ArgumentNullException("typeFullName");
+                throw new ArgumentNullException(nameof(typeFullName));
             }
             if (string.IsNullOrEmpty(propertyName))
             {
-                throw new ArgumentNullException("propertyName");
+                throw new ArgumentNullException(nameof(propertyName));
             }
             var assembly = GetAssembly(assemblyName);
             if (assembly == null) return null;
@@ -159,15 +159,15 @@ namespace CxSolution.CxRouRou.Reflection
         {
             if (assembly == null)
             {
-                throw new ArgumentNullException("assembly");
+                throw new ArgumentNullException(nameof(assembly));
             }
             if (string.IsNullOrEmpty(typeFullName))
             {
-                throw new ArgumentNullException("typeFullName");
+                throw new ArgumentNullException(nameof(typeFullName));
             }
             if (string.IsNullOrEmpty(fieldName))
             {
-                throw new ArgumentNullException("fieldName");
+                throw new ArgumentNullException(nameof(fieldName));
             }
             var type = assembly.GetType(typeFullName, false);
             if (type == null) return null;
@@ -186,15 +186,15 @@ namespace CxSolution.CxRouRou.Reflection
         {
             if (string.IsNullOrEmpty(assemblyName))
             {
-                throw new ArgumentNullException("assemblyName");
+                throw new ArgumentNullException(nameof(assemblyName));
             }
             if (string.IsNullOrEmpty(typeFullName))
             {
-                throw new ArgumentNullException("typeFullName");
+                throw new ArgumentNullException(nameof(typeFullName));
             }
             if (string.IsNullOrEmpty(fieldName))
             {
-                throw new ArgumentNullException("fieldName");
+                throw new ArgumentNullException(nameof(fieldName));
             }
             var assembly = GetAssembly(assemblyName);
             if (assembly == null) return null;
@@ -277,15 +277,15 @@ namespace CxSolution.CxRouRou.Reflection
         {
             if (assembly == null)
             {
-                throw new ArgumentNullException("assembly");
+                throw new ArgumentNullException(nameof(assembly));
             }
             if (string.IsNullOrEmpty(typeFullName))
             {
-                throw new ArgumentNullOrEmptyException("typeFullName");
+                throw new ArgumentNullOrEmptyException(nameof(typeFullName));
             }
             if (string.IsNullOrEmpty(eventName))
             {
-                throw new ArgumentNullOrEmptyException("eventName");
+                throw new ArgumentNullOrEmptyException(nameof(eventName));
             }
             var type = assembly.GetType(typeFullName, false);
             if (type == null) return null;

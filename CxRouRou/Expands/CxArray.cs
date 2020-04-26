@@ -22,11 +22,11 @@ namespace CxSolution.CxRouRou.Expands
         {
             if (source == null)
             {
-                throw new ArgumentNullException();
+                throw new ArgumentNullException(nameof(source));
             }
             if (index < 0 || index + length > source.Length)
             {
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(index) + "," + nameof(length), "参数超出索引");
             }
             T[] ts = new T[length];
             Array.Copy(source, index, ts, 0, length);
@@ -44,11 +44,11 @@ namespace CxSolution.CxRouRou.Expands
         {
             if (source == null)
             {
-                throw new ArgumentNullException();
+                throw new ArgumentNullException(nameof(source));
             }
             if (index < 0 || index + length > source.LongLength)
             {
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(index) + "," + nameof(length), "参数超出索引");
             }
             T[] ts = new T[length];
             Array.Copy(source, index, ts, 0, length);
@@ -64,7 +64,7 @@ namespace CxSolution.CxRouRou.Expands
         {
             if (source == null)
             {
-                throw new ArgumentNullException();
+                throw new ArgumentNullException(nameof(source));
             }
             StringBuilder sb = new StringBuilder();
             sb.Append("[");
@@ -78,6 +78,26 @@ namespace CxSolution.CxRouRou.Expands
                 }
             }
             sb.Append("]");
+            return sb.ToString();
+        }
+        /// <summary>
+        /// 将数组中的元素连接起来
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static string Concat<T>(this T[] source)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+            StringBuilder sb = new StringBuilder();
+            int count = source.Length;
+            for (int i = 0; i < count; i++)
+            {
+                sb.Append(source[i]);
+            }
             return sb.ToString();
         }
         /// <summary>

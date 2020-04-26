@@ -23,11 +23,11 @@ namespace CxSolution.CxRouRou.Collections
         {
             if (size <= 0)
             {
-                throw new ArgumentException("size参数值必须大于0", "size");
+                throw new ArgumentException("参数值必须大于0", nameof(size));
             }
             if (ctor == null)
             {
-                throw new ArgumentNullException("ctor", "必须提供构造方法ctor");
+                throw new ArgumentNullException(nameof(ctor), "必须提供构造方法");
             }
             _data = new T[size];
             _index = 0;
@@ -42,7 +42,7 @@ namespace CxSolution.CxRouRou.Collections
         /// <param name="colletion"></param>
         public CxRoundQueue(T[] colletion)
         {
-            _data = colletion ?? throw new ArgumentNullException("colletion", "参数不可为空");
+            _data = colletion ?? throw new ArgumentNullException(nameof(colletion));
             _index = 0;
         }
         /// <summary>

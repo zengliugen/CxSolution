@@ -19,14 +19,7 @@ namespace CxSolution.CxRouRou.Util
         /// <param name="value"></param>
         public static void Write(object value)
         {
-            if (WriteTime)
-            {
-                Console.Write(CxString.Format("[{0}] {1}", CxTime.GetDateTime(), value));
-            }
-            else
-            {
-                Console.Write(value);
-            }
+            Console.Write(value);
         }
         /// <summary>
         /// 输出
@@ -36,15 +29,7 @@ namespace CxSolution.CxRouRou.Util
         public static void Write(string format, params object[] args)
         {
             string value = CxString.Format(format, args);
-            if (WriteTime)
-            {
-                Console.Write(CxString.Format("[{0}] {1}", CxTime.GetDateTime(), value));
-            }
-            else
-            {
-                Console.Write(value);
-
-            }
+            Console.Write(value);
         }
         /// <summary>
         /// 输出行
