@@ -15,9 +15,9 @@ namespace CxSolution.CxRouRou.Net.Sockets.Udp
         /// </summary>
         internal byte[] Buffer;
         /// <summary>
-        /// 远程地址
+        /// 监听地址
         /// </summary>
-        internal EndPoint RemoteAddress;
+        internal EndPoint ListenAddress;
         /// <summary>
         /// 初始化
         /// </summary>

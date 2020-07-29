@@ -148,9 +148,9 @@ namespace CxSolution.CxRouRou.Net.Sockets.Udp
         /// <summary>
         /// 开始监听(IPv4)
         /// </summary>
-        /// <param name="remoteAddress"></param>
+        /// <param name="listenAddress"></param>
         /// <param name="port"></param>
-        private void StartListenIPv4(EndPoint remoteAddress, ushort port)
+        private void StartListenIPv4(EndPoint listenAddress, ushort port)
         {
             if (_socketIPv4 != null)
             {
@@ -165,7 +165,7 @@ namespace CxSolution.CxRouRou.Net.Sockets.Udp
                 _socketIPv4.Bind(localEndPoint);
                 _socketIPv4.SendBufferSize = _netConfig.SendBufferSize;
 
-                _sessionIPv4.RemoteAddress = remoteAddress;
+                _sessionIPv4.ListenAddress = listenAddress;
 
                 StartSessionIPv4();
 
@@ -180,9 +180,9 @@ namespace CxSolution.CxRouRou.Net.Sockets.Udp
         /// <summary>
         /// 开始监听(IPv6)
         /// </summary>
-        /// <param name="remoteAddress"></param>
+        /// <param name="listenAddress"></param>
         /// <param name="port"></param>
-        private void StartListenIPv6(EndPoint remoteAddress, ushort port)
+        private void StartListenIPv6(EndPoint listenAddress, ushort port)
         {
             if (_socketIPv6 != null)
             {
@@ -197,7 +197,7 @@ namespace CxSolution.CxRouRou.Net.Sockets.Udp
                 _socketIPv6.Bind(localEndPoint);
                 _socketIPv6.SendBufferSize = _netConfig.SendBufferSize;
 
-                _sessionIPv6.RemoteAddress = remoteAddress;
+                _sessionIPv6.ListenAddress = listenAddress;
 
                 StartSessionIPv6();
 
@@ -344,7 +344,7 @@ namespace CxSolution.CxRouRou.Net.Sockets.Udp
         /// </summary>
         private void StartSessionIPv4()
         {
-            _socketAsyncEventArgsIPv4.RemoteEndPoint = _sessionIPv4.RemoteAddress;
+            _socketAsyncEventArgsIPv4.RemoteEndPoint = _sessionIPv4.ListenAddress;
             if (!_socketIPv4.ReceiveFromAsync(_socketAsyncEventArgsIPv4))
             {
                 ReceiveCallBackIPv4(_socketIPv4, _socketAsyncEventArgsIPv4);
@@ -355,7 +355,7 @@ namespace CxSolution.CxRouRou.Net.Sockets.Udp
         /// </summary>
         private void StartSessionIPv6()
         {
-            _socketAsyncEventArgsIPv6.RemoteEndPoint = _sessionIPv6.RemoteAddress;
+            _socketAsyncEventArgsIPv6.RemoteEndPoint = _sessionIPv6.ListenAddress;
             if (!_socketIPv6.ReceiveFromAsync(_socketAsyncEventArgsIPv6))
             {
                 ReceiveCallBackIPv4(_socketIPv6, _socketAsyncEventArgsIPv6);
