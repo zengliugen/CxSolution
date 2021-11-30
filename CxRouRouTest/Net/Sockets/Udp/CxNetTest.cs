@@ -39,8 +39,8 @@ namespace CxSolution.CxRouRouTest.Net.Sockets.Udp
         {
             var result = true;
             string localHost = "127.0.0.1";
-            ushort serverPort = 30001;
-            ushort clientPort = 30002;
+            ushort serverPort = 60001;
+            ushort clientPort = 60002;
 
             var serverNet = new TestNet();
             serverNet.StartListen(serverPort);
